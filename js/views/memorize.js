@@ -1,0 +1,75 @@
+/* memorize.js — one ayah at a time: hide progressively, peek, loop, mark. */
+(function (BA) {
+  const { el, clear, clamp } = BA.util;
+  (BA.views = BA.views || {}).memorize = {
+    mount(sec) {
+      const { store, data, audio, reveal } = BA;
+      store.setLast({ view: 'memorize' });
+      const ri = store.settings.riwayah;
+      let n = clamp(store.last.ayah || 1, 1, data.count);
+      let level = store.settings.hideLevel || 0;
+      clear(sec);
+
+      const heading = el('strong', {}, '');
+      const jump = el('input', { type: 'number', min: 1, max: data.count, value: n, style: 'width:5.5em' });
+      jump.addEventListener('change', () => go(clamp(+jump.value || 1, 1, data.count)));
+
+      const levelSlider = el('input', { type: 'range', min: 0, max: 4, step: 1, value: level });
+      const levelLabel = el('span', { class: 'pill' }, '');
+      levelSlider.addEventListener('input', () => { level = +levelSlider.value; store.setSetting('hideLevel', level); render(); });
+
+      const arEl = el('div', { class: 'ar', dataset: { riwayah: ri } });
+      const card = el('div', { class: 'ayah-card' }, arEl);
+      const statusPill = el('span', { class: 'pill' }, '');
+
+      const nav = el('div', { class: 'card' },
+        el('div', { class: 'row spread' },
+          el('div', { class: 'row' },
+            el('button', { class: 'icon-btn', onclick: () => go(n - 1) }, '◀'),
+            heading,
+            el('button', { class: 'icon-btn', onclick: () => go(n + 1) }, '▶')),
+          el('div', { class: 'row' }, el('span', { class: 'muted' }, 'Go to'), jump)),
+        el('div', { class: 'field', style: 'margin-top:.5rem' },
+          el('label', {}, 'Hide level — tap a hidden word to peek'),
+          el('div', { class: 'row' }, levelSlider, levelLabel)));
+
+      const actions = el('div', { class: 'row', style: 'margin:.2rem 0 1rem' },
+        el('button', { class: 'btn', onclick: loopAyah }, '🔁 Loop this ayah'),
+        el('button', { class: 'btn ghost', onclick: () => { level = 0; levelSlider.value = 0; store.setSetting('hideLevel', 0); render(); } }, '👁 Reveal'),
+        el('button', { class: 'btn gold', onclick: gotIt }, '✓ Got it'),
+        el('button', { class: 'btn ghost', onclick: missed }, '✗ Missed'),
+        statusPill);
+
+      sec.append(nav, card, actions);
+
+      function render() {
+        levelLabel.textContent = reveal.LEVELS[level];
+        clear(arEl);
+        if (level === 0) arEl.append(document.createTextNode(data.text(n, ri) + ' '));
+        else reveal.render(arEl, data.words(n, ri), level);
+        arEl.append(el('span', { class: 'ayah-num' }, n));
+        heading.textContent = `Ayah ${n} / ${data.count}`;
+        jump.value = n;
+        const st = store.status('2:' + n);
+        statusPill.textContent = ({ unseen: '◌ new', learning: '○ learning', solid: '◐ solid', mastered: '● mastered' })[st];
+        statusPill.style.background = st === 'mastered' ? 'var(--emerald)' : st === 'solid' ? '#7bbf97' : st === 'learning' ? 'var(--gold-soft)' : 'var(--border)';
+        statusPill.style.color = st === 'mastered' ? '#fff' : 'var(--text)';
+      }
+      function go(to) { n = clamp(to, 1, data.count); store.setLast({ ayah: n }); render(); }
+      function loopAyah() {
+        store.setSetting('reciter', store.settings.reciter); BA.app.reconfigure();
+        audio.playSingle(n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
+        card.classList.add('playing');
+      }
+      function gotIt() {
+        const st = store.bump('2:' + n, +1); BA.app.refreshStreak(); render();
+        if (st === 'mastered') BA.util.toast('🎉 Mastered ayah ' + n);
+        else BA.util.toast('Saved · ' + st);
+      }
+      function missed() { store.markAyah('2:' + n, 'learning'); BA.app.refreshStreak(); render(); }
+
+      BA.app.onAyah((a) => { card.classList.toggle('playing', a === n); });
+      render();
+    },
+  };
+})(window.BA = window.BA || {});

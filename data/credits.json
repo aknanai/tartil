@@ -1,0 +1,28 @@
+{
+  "text": [
+    {
+      "riwayah": "hafs",
+      "source": "Tanzil Project",
+      "url": "https://tanzil.net",
+      "license": "Verbatim redistribution permitted with attribution; do not modify the text."
+    },
+    {
+      "riwayah": "warsh",
+      "source": "aziz011133/quran_warsh (Warsh ʿan Nāfiʿ, QPC rasm)",
+      "url": "https://github.com/aziz011133/quran_warsh",
+      "note": "Remapped from Madani (285) to Kufan (286) numbering to align with per-ayah audio."
+    }
+  ],
+  "audio": [
+    {
+      "source": "EveryAyah",
+      "url": "https://everyayah.com",
+      "use": "per-ayah recitations (Hafs + Warsh) for the repeat/loop engine"
+    },
+    {
+      "source": "mp3quran.net",
+      "url": "https://mp3quran.net",
+      "use": "full-surah Warsh recitations (e.g. ʿUmar al-Qazābrī)"
+    }
+  ]
+}

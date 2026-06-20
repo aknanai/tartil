@@ -1,0 +1,14 @@
+{
+  "name": "Al-Baqarah · Hifz",
+  "short_name": "Al-Baqarah",
+  "description": "Memorize Surah Al-Baqarah — Ḥafṣ & Warsh, with audio loop, progressive hiding, tests and progress.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F1E3",
+  "theme_color": "#1F6B4C",
+  "icons": [
+    { "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

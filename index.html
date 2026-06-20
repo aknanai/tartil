@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F6B4C">
+<title>Al-Baqarah · Hifz</title>
+<meta name="description" content="A calm, offline-friendly tool for memorizing Surah Al-Baqarah — Ḥafṣ and Warsh, with audio loop, progressive hiding, tests and progress.">
+<link rel="icon" href="./assets/icon.svg">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./assets/style.css">
+<script>
+/* dev error overlay — surfaces any uncaught error visibly (harmless in prod) */
+window.addEventListener('error', function (e) {
+  var d = document.getElementById('bootErr');
+  if (!d) { d = document.createElement('pre'); d.id = 'bootErr';
+    d.style.cssText = 'position:fixed;z-index:999;left:0;right:0;bottom:0;max-height:45vh;overflow:auto;margin:0;padding:8px;background:#b4502f;color:#fff;font:12px/1.4 monospace;white-space:pre-wrap';
+    (document.body || document.documentElement).appendChild(d); }
+  d.textContent += e.message + '  @ ' + String(e.filename || '').split('/').pop() + ':' + e.lineno + '\n';
+});
+</script>
+</head>
+<body>
+<!-- ░░░ top bar ░░░ -->
+<header class="topbar">
+  <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+  <a class="brand" href="#/home">
+    <span class="brand-mark">☾</span>
+    <span class="brand-name">Al-Baqarah <small>البقرة</small></span>
+  </a>
+  <div class="topbar-spacer"></div>
+  <label class="riwayah-pick">
+    <span class="ri-label">Reading</span>
+    <select id="riwayahSelect" aria-label="Reading (riwāyah)"></select>
+  </label>
+  <div class="streak-badge" id="streakBadge" title="Daily streak">🔥 <span id="streakNum">0</span></div>
+  <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+</header>
+
+<div class="layout">
+  <!-- ░░░ sidebar (built by nav.js from VIEWS) ░░░ -->
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ░░░ views ░░░ -->
+  <main id="main">
+    <section data-view="home"     class="view"></section>
+    <section data-view="listen"   class="view"></section>
+    <section data-view="memorize" class="view"></section>
+    <section data-view="test"     class="view"></section>
+    <section data-view="progress" class="view"></section>
+    <section data-view="settings" class="view"></section>
+  </main>
+</div>
+
+<!-- ░░░ persistent audio bar ░░░ -->
+<footer class="player" id="player" hidden>
+  <div class="player-line" id="playerProgress"><i></i></div>
+  <div class="player-row">
+    <button class="icon-btn" id="pPrev" aria-label="Previous ayah">⏮</button>
+    <button class="icon-btn play" id="pPlay" aria-label="Play / pause">▶</button>
+    <button class="icon-btn" id="pNext" aria-label="Next ayah">⏭</button>
+    <div class="player-meta">
+      <strong id="pTitle">—</strong>
+      <span id="pSub" class="muted"></span>
+    </div>
+    <button class="icon-btn" id="pStop" aria-label="Stop">■</button>
+  </div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+
+<!-- load order = dependency order (classic scripts, shared window.BA namespace) -->
+<script src="./js/util.js"></script>
+<script src="./js/store.js"></script>
+<script src="./js/data.js"></script>
+<script src="./js/reciters.js"></script>
+<script src="./js/audio-engine.js"></script>
+<script src="./js/reveal.js"></script>
+<script src="./js/views/home.js"></script>
+<script src="./js/views/listen.js"></script>
+<script src="./js/views/memorize.js"></script>
+<script src="./js/views/test.js"></script>
+<script src="./js/views/progress.js"></script>
+<script src="./js/views/settings.js"></script>
+<script src="./assets/nav.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

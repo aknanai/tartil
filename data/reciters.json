@@ -1,0 +1,43 @@
+{
+  "riwayat": {
+    "hafs":  { "label_en": "Ḥafṣ ʿan ʿĀṣim",  "label_ar": "حفص عن عاصم" },
+    "warsh": { "label_en": "Warsh ʿan Nāfiʿ", "label_ar": "ورش عن نافع" }
+  },
+  "reciters": [
+    { "id": "husary_muallim",   "riwayah": "hafs",  "capability": "per-ayah",
+      "name_en": "Maḥmūd Khalīl al-Ḥuṣarī — Muʿallim (teaching)", "name_ar": "محمود خليل الحصري (معلم)",
+      "source": "everyayah", "folder": "Husary_Muallim_128kbps", "teaching": true },
+
+    { "id": "minshawy_murattal", "riwayah": "hafs", "capability": "per-ayah",
+      "name_en": "Muḥammad Ṣiddīq al-Minshāwī — Murattal", "name_ar": "محمد صديق المنشاوي (مرتل)",
+      "source": "everyayah", "folder": "Minshawy_Murattal_128kbps" },
+
+    { "id": "alafasy",          "riwayah": "hafs",  "capability": "per-ayah",
+      "name_en": "Mishary Rāshid al-ʿAfāsy", "name_ar": "مشاري راشد العفاسي",
+      "source": "everyayah", "folder": "Alafasy_128kbps" },
+
+    { "id": "warsh_dosary",     "riwayah": "warsh", "capability": "per-ayah",
+      "name_en": "Ibrāhīm al-Dōsarī (Warsh)", "name_ar": "إبراهيم الدوسري (ورش)",
+      "source": "everyayah", "folder": "warsh/warsh_ibrahim_aldosary_128kbps", "teaching": true },
+
+    { "id": "warsh_jazaery",    "riwayah": "warsh", "capability": "per-ayah",
+      "name_en": "Yāsīn al-Jazāʾirī (Warsh)", "name_ar": "ياسين الجزائري (ورش)",
+      "source": "everyayah", "folder": "warsh/warsh_yassin_al_jazaery_64kbps" },
+
+    { "id": "warsh_abdulbasit", "riwayah": "warsh", "capability": "per-ayah",
+      "name_en": "ʿAbd al-Bāsiṭ ʿAbd al-Ṣamad (Warsh)", "name_ar": "عبد الباسط عبد الصمد (ورش)",
+      "source": "everyayah", "folder": "warsh/warsh_Abdul_Basit_128kbps" },
+
+    { "id": "qazabri",          "riwayah": "warsh", "capability": "full-surah",
+      "name_en": "ʿUmar al-Qazābrī (Warsh — full surah)", "name_ar": "عمر القزابري (ورش)",
+      "source": "mp3quran", "server": "https://server9.mp3quran.net/omar_warsh/" },
+
+    { "id": "koshi",            "riwayah": "warsh", "capability": "full-surah",
+      "name_en": "Al-ʿAyyūn al-Kūshī (Warsh — full surah)", "name_ar": "العيون الكوشي (ورش)",
+      "source": "mp3quran", "server": "https://server11.mp3quran.net/koshi/" },
+
+    { "id": "husary_warsh",     "riwayah": "warsh", "capability": "full-surah",
+      "name_en": "Maḥmūd Khalīl al-Ḥuṣarī (Warsh — full surah)", "name_ar": "محمود خليل الحصري (ورش)",
+      "source": "mp3quran", "server": "https://server13.mp3quran.net/husr/Rewayat-Warsh-A-n-Nafi/" }
+  ]
+}

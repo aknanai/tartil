@@ -1,0 +1,5 @@
+# build-time source snapshots (re-fetchable via `build_data.py --fetch`)
+tools/_src_*
+# os / editor cruft
+.DS_Store
+*~
