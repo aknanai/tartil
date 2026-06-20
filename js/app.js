@@ -45,9 +45,10 @@
     P.pNext.addEventListener('click', () => { if (curAyah < data.count) audio.playSingle(curAyah + 1, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs }); });
 
     audio.on('statechange', s => {
-      P.pPlay.textContent = (s === 'playing' || s === 'gap') ? '⏸' : '▶';
+      P.pPlay.textContent = (s === 'playing' || s === 'gap' || s === 'loading') ? '⏸' : '▶';
       if (s !== 'stopped') show();
     });
+    audio.on('loading', () => { show(); P.pSub.textContent = 'buffering…'; });
     audio.on('ayahstart', (n, item) => {
       curAyah = n; store.setLast({ ayah: n });
       const r = audio.getReciter();

@@ -12,7 +12,7 @@
   let audio, prefetch;
   let reciter = null, riwayah = 'hafs';
   let playlist = [], idx = -1, gapMs = 800, state = 'stopped', gapTimer = null, retried = false;
-  let rate = 1;
+  let rate = 1, lastStartedIdx = -1;
 
   function setState(s) { state = s; emit('statechange', s); }
 
@@ -25,7 +25,16 @@
       if (state !== 'playing' || !audio.duration) return;
       emit('progress', audio.currentTime / audio.duration, audio.currentTime, audio.duration);
     });
-    audio.addEventListener('play', () => setState('playing'));
+    // emit ayahstart only when audio ACTUALLY begins (keeps the counter in lockstep
+    // with the sound instead of jumping ahead while the next ayah is still buffering)
+    audio.addEventListener('playing', () => {
+      setState('playing');
+      if (idx !== lastStartedIdx) {
+        lastStartedIdx = idx;
+        const item = playlist[idx];
+        if (item) emit('ayahstart', item.ayah, item);
+      }
+    });
   }
 
   function configure({ reciterId, riwayah: ri }) {
@@ -69,11 +78,12 @@
     const item = playlist[idx];
     if (!item) return finish();
     retried = false;
+    setState('loading');           // counter advances on the 'playing' event, not here
+    emit('loading', item.ayah, item);
     audio.src = item.url;
     audio.playbackRate = rate;
     const p = audio.play();
     if (p && p.catch) p.catch(() => {/* autoplay block: wait for user gesture */ setState('paused'); });
-    emit('ayahstart', item.ayah, item);
     // warm the next file
     const nxt = playlist[idx + 1];
     if (nxt && nxt.url && nxt.url !== item.url) { try { prefetch.src = nxt.url; } catch (e) {} }
@@ -101,7 +111,7 @@
   function pause() { if (state === 'playing') { audio.pause(); setState('paused'); } else if (state === 'gap') { clearTimeout(gapTimer); setState('paused'); } }
   function resume() { if (state === 'paused') { if (audio.src && audio.currentTime < (audio.duration || 1e9)) audio.play(); else advance(); } }
   function toggle() { (state === 'playing' || state === 'gap') ? pause() : resume(); }
-  function stop() { clearTimeout(gapTimer); if (audio) { audio.pause(); } playlist = []; idx = -1; setState('stopped'); }
+  function stop() { clearTimeout(gapTimer); if (audio) { audio.pause(); } playlist = []; idx = -1; lastStartedIdx = -1; setState('stopped'); }
 
   function setRate(r) { rate = r; if (audio) audio.playbackRate = r; }
   function getRate() { return rate; }
