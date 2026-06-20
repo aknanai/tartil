@@ -1,5 +1,5 @@
 /* sw.js — offline app shell + serve any audio the user downloaded for offline. */
-const SHELL = 'ba9ara-shell-v4';
+const SHELL = 'ba9ara-shell-v5';
 const AUDIO = 'ba9ara-audio-v1';
 const SHELL_FILES = [
   './', './index.html', './manifest.webmanifest',
@@ -9,7 +9,7 @@ const SHELL_FILES = [
   './assets/fonts/scheherazade-400.woff2', './assets/fonts/scheherazade-700.woff2', './assets/fonts/amiri-quran.woff2',
   './js/util.js', './js/store.js', './js/data.js', './js/reciters.js', './js/audio-engine.js', './js/reveal.js', './js/app.js',
   './js/views/home.js', './js/views/listen.js', './js/views/memorize.js', './js/views/test.js', './js/views/progress.js', './js/views/settings.js',
-  './data/baqarah.json', './data/reciters.json', './data/credits.json',
+  './data/baqarah.json', './data/reciters.json', './data/credits.json', './data/translations.json',
 ];
 
 self.addEventListener('install', e => {

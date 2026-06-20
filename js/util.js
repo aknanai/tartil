@@ -46,6 +46,22 @@
       for (const ch of word) { const c = ch.codePointAt(0); if (c >= 0x0621 && c <= 0x064A) out += ch; }
       return out;
     },
+    // fold Arabic for forgiving, diacritic-insensitive search.
+    // Uthmani spelling marks long ā as a dagger alef (كتٰب) and uses alef-wasla etc.,
+    // so we drop ALL marks AND all alef forms (incl. dagger alef) on both query+text —
+    // this makes كتاب / كتٰب / الكتاب all collapse to the same key (high recall for jumping).
+    normalizeArabic(s) {
+      let out = '';
+      for (const ch of (s || '')) {
+        const c = ch.codePointAt(0);
+        if ((c >= 0x064B && c <= 0x065F) || c === 0x0670 || c === 0x0640 || (c >= 0x06D6 && c <= 0x06ED)) continue; // marks/tatweel
+        out += ch;
+      }
+      return out
+        .replace(/[أإآٱاٰ]/g, '')   // remove every alef form
+        .replace(/ى/g, 'ي').replace(/ئ/g, 'ي').replace(/ؤ/g, 'و')
+        .replace(/ة/g, 'ه').replace(/[ءۀ]/g, '').replace(/\s+/g, ' ').trim();
+    },
   };
   BA.util = U;
 })(window.BA = window.BA || {});

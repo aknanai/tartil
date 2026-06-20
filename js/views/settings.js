@@ -54,6 +54,13 @@
         el('div', { class: 'card' }, el('h3', {}, 'Reading & audio'),
           field('Reading (riwāyah)', riSel),
           field('Default reciter', recSel)),
+        el('div', { class: 'card' }, el('h3', {}, '🌐 Translation'),
+          el('div', { class: 'muted', style: 'font-size:.84rem;margin-bottom:.5rem' },
+            'Show the meaning under each ayah (Listen & Memorize). This is a translation/interpretation — the Arabic Qur’an text itself is never changed.'),
+          field('Language', BA.app.makeLangSelect()),
+          (s.lang !== 'off' && data.langMeta(s.lang))
+            ? el('div', { class: 'muted', style: 'font-size:.8rem;margin-top:.4rem' }, 'Source: ' + data.langMeta(s.lang).source)
+            : el('span')),
         el('div', { class: 'card' }, el('h3', {}, 'Loop defaults'),
           el('div', { class: 'grid2' }, field('Repeat each ayah', reps), field('Loop the range', rng),
             field('Gap between repeats', el('div', { class: 'row' }, gap, gapV)), field('Speed', speedBtns))),

@@ -20,6 +20,7 @@
 
       const arEl = el('div', { class: 'ar', dataset: { riwayah: ri } });
       const card = el('div', { class: 'ayah-card' }, arEl);
+      const trBox = el('div', { class: 'tr-box' });
       const statusPill = el('span', { class: 'pill' }, '');
 
       const nav = el('div', { class: 'card' },
@@ -31,7 +32,10 @@
           el('div', { class: 'row' }, el('span', { class: 'muted' }, 'Go to'), jump)),
         el('div', { class: 'field', style: 'margin-top:.5rem' },
           el('label', {}, 'Hide level — tap a hidden word to peek'),
-          el('div', { class: 'row' }, levelSlider, levelLabel)));
+          el('div', { class: 'row' }, levelSlider, levelLabel)),
+        el('div', { class: 'field', style: 'margin-top:.5rem' },
+          el('label', {}, 'Translation'),
+          BA.app.makeLangSelect()));
 
       const actions = el('div', { class: 'row', style: 'margin:.2rem 0 1rem' },
         el('button', { class: 'btn', onclick: loopAyah }, '🔁 Loop this ayah'),
@@ -40,7 +44,35 @@
         el('button', { class: 'btn ghost', onclick: missed }, '✗ Missed'),
         statusPill);
 
-      sec.append(nav, card, actions);
+      // ── search / jump bar ──
+      const searchInput = el('input', { type: 'search', class: 'search-input', inputmode: 'search',
+        placeholder: 'Jump to ayah # or search words…', autocomplete: 'off' });
+      const results = el('div', { class: 'search-results', hidden: true });
+      const searchCard = el('div', { class: 'card' },
+        el('div', { class: 'search-wrap' }, el('span', { class: 'search-ic' }, '🔍'), searchInput), results);
+
+      function pick(toN) { go(toN); searchInput.value = ''; results.hidden = true; clear(results); }
+      function runSearch() {
+        const q = searchInput.value.trim();
+        clear(results);
+        if (!q) { results.hidden = true; return; }
+        const matches = data.search(q, ri, 25);
+        results.hidden = false;
+        if (!matches.length) { results.append(el('div', { class: 'muted', style: 'padding:.5rem' }, 'No matching ayah')); return; }
+        matches.forEach(m => {
+          const snip = m.text.length > 80 ? m.text.slice(0, 80) + '…' : m.text;
+          results.append(el('div', { class: 'search-result', onclick: () => pick(m.n) },
+            el('span', { class: 'ayah-num' }, m.n),
+            el('span', { class: 'ar sr-text', dataset: { riwayah: ri } }, snip)));
+        });
+      }
+      searchInput.addEventListener('input', runSearch);
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { const m = data.search(searchInput.value, ri, 1); if (m.length) pick(m[0].n); }
+        else if (e.key === 'Escape') { searchInput.value = ''; runSearch(); }
+      });
+
+      sec.append(searchCard, nav, card, trBox, actions);
 
       function render() {
         levelLabel.textContent = reveal.LEVELS[level];
@@ -48,6 +80,8 @@
         if (level === 0) arEl.append(document.createTextNode(data.text(n, ri) + ' '));
         else reveal.render(arEl, data.words(n, ri), level);
         arEl.append(el('span', { class: 'ayah-num' }, n));
+        clear(trBox);
+        const tr = BA.app.translationEl(n); if (tr) trBox.append(tr);
         heading.textContent = `Ayah ${n} / ${data.count}`;
         jump.value = n;
         const st = store.status('2:' + n);

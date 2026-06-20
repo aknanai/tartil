@@ -45,7 +45,8 @@
           field('Reciter', recSel),
           fromI.wrap, toI.wrap, repsI.wrap, rangeI.wrap,
           field('Gap between repeats', el('div', { class: 'row' }, gap, gapVal)),
-          field('Speed', speedBtns)),
+          field('Speed', speedBtns),
+          field('Translation', BA.app.makeLangSelect())),
         el('div', { class: 'row', style: 'margin-top:.6rem' }, playBtn,
           el('button', { class: 'btn ghost', onclick: () => { audio.stop(); } }, '■ Stop')),
         capNote);
@@ -63,6 +64,7 @@
             el('div', { class: 'ar', dataset: { riwayah: ri } },
               document.createTextNode(data.text(n, ri) + ' '),
               el('span', { class: 'ayah-num' }, n)));
+          const tr = BA.app.translationEl(n); if (tr) card.append(tr);
           cards[n] = card; list.append(card);
         }
       }

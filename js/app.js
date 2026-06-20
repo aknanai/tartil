@@ -73,6 +73,30 @@
     onAyah(fn) { highlighter = fn; },     // view registers a highlight hook (replaces previous)
     clearAyah() { highlighter = null; },
     get curAyah() { return curAyah; },
+    // reusable translation-language <select>; changing it reloads & refreshes the view
+    makeLangSelect() {
+      const sel = util.el('select', { 'aria-label': 'Translation language' });
+      data.LANGS.forEach(([v, label]) => {
+        const o = util.el('option', { value: v }, label);
+        if (v === store.settings.lang) o.selected = true;
+        sel.append(o);
+      });
+      sel.addEventListener('change', async () => {
+        store.setSetting('lang', sel.value);
+        if (sel.value !== 'off') { try { await data.loadTranslations(); } catch (e) { util.toast('Could not load translation'); } }
+        nav.route();
+      });
+      return sel;
+    },
+    // translation block for ayah n in the active language (or null when off/unavailable)
+    translationEl(n) {
+      const lang = store.settings.lang;
+      if (!lang || lang === 'off') return null;
+      const txt = data.translation(n, lang);
+      if (!txt) return null;
+      const meta = data.langMeta(lang);
+      return util.el('div', { class: 'translation', dir: meta ? meta.dir : 'ltr', lang }, txt);
+    },
     canInstall() { return !!deferredPrompt; },
     async promptInstall() {
       if (!deferredPrompt) return false;
@@ -99,6 +123,7 @@
     fillRiwayahSelect();
     reconfigure();
     audio.setRate(store.settings.speed || 1);
+    if (store.settings.lang && store.settings.lang !== 'off') { try { await data.loadTranslations(); } catch (e) {} }
     refreshStreak();
     if (BA.settings) BA.settings.applyFont(store.settings.font || 'scheherazade');
     nav.buildSidebar();
