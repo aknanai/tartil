@@ -8,11 +8,12 @@
       clear(sec);
       const pct = store.percent(), c = store.counts();
 
-      const heat = el('div', { class: 'heat' });
+      const heat = el('div', { class: 'heat', role: 'list' });
       for (let n = 1; n <= data.count; n++) {
         const st = store.status('2:' + n);
-        heat.append(el('i', {
-          dataset: { s: st }, title: `Ayah ${n} · ${st}`,
+        heat.append(el('button', {
+          type: 'button', role: 'listitem', dataset: { s: st },
+          title: `Ayah ${n} · ${st}`, 'aria-label': `Ayah ${n}, ${st} — study`,
           onclick: () => { store.setLast({ ayah: n }); nav.go('memorize'); },
         }));
       }

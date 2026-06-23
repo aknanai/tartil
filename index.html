@@ -16,14 +16,17 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="stylesheet" href="./assets/style.css">
 <script>
-/* dev error overlay — surfaces any uncaught error visibly (harmless in prod) */
-window.addEventListener('error', function (e) {
-  var d = document.getElementById('bootErr');
-  if (!d) { d = document.createElement('pre'); d.id = 'bootErr';
-    d.style.cssText = 'position:fixed;z-index:999;left:0;right:0;bottom:0;max-height:45vh;overflow:auto;margin:0;padding:8px;background:#b4502f;color:#fff;font:12px/1.4 monospace;white-space:pre-wrap';
-    (document.body || document.documentElement).appendChild(d); }
-  d.textContent += e.message + '  @ ' + String(e.filename || '').split('/').pop() + ':' + e.lineno + '\n';
-});
+/* dev error overlay — surfaces uncaught errors visibly. Only on localhost or
+   with ?debug so deployed users never see the red box. */
+if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]debug\b/.test(location.search)) {
+  window.addEventListener('error', function (e) {
+    var d = document.getElementById('bootErr');
+    if (!d) { d = document.createElement('pre'); d.id = 'bootErr';
+      d.style.cssText = 'position:fixed;z-index:999;left:0;right:0;bottom:0;max-height:45vh;overflow:auto;margin:0;padding:8px;background:#b4502f;color:#fff;font:12px/1.4 monospace;white-space:pre-wrap';
+      (document.body || document.documentElement).appendChild(d); }
+    d.textContent += e.message + '  @ ' + String(e.filename || '').split('/').pop() + ':' + e.lineno + '\n';
+  });
+}
 </script>
 </head>
 <body>
