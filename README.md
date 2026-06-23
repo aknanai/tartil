@@ -55,6 +55,33 @@ python3 tools/build_data.py --fetch    # re-download Ḥafṣ + Warsh sources fi
 ```
 Reciters are curated in `data/reciters.json` (verified against the mp3quran v3 API).
 
+## Splitting full-surah audio into ayāt
+Some beautiful Warsh reciters are only published as a *single whole-surah file*, so
+the app can't loop or hide them per ayah. `tools/split_ayat.py` cuts one long
+recitation into per-ayah clips named `{SS}{AAA}.mp3` (the EveryAyah scheme, e.g.
+`002001.mp3`) so they drop straight into a `reciters.json` entry.
+
+It doesn't trust Whisper's transcript (it mis-reads Qur'anic Arabic); instead it
+takes Whisper's **word timestamps**, aligns them to the **known ayah text** with a
+Needleman–Wunsch pass, places each cut in the pause between ayāt, and snaps it to
+the quietest nearby moment. A `report.json` flags any suspicious durations to check.
+
+```bash
+pip install -r tools/requirements-split.txt        # + a system ffmpeg on PATH
+
+# on a GPU box, with the medium model:
+python tools/split_ayat.py \
+    --audio qazabri_baqarah.mp3 --surah 2 --riwayah warsh \
+    --out out/qazabri --model medium --device cuda
+
+python tools/split_ayat.py --self-test             # logic check, no model/audio
+```
+
+Reference text comes from `data/baqarah.json` for surah 2, else `api.alquran.cloud`
+(Ḥafṣ); pass `--ref-json FILE` for offline use or Warsh editions the API lacks.
+After splitting, host the folder and add a `per-ayah` reciter pointing at it
+(see the app tie-in note in `tools/split_ayat.py`).
+
 ## Project layout
 ```
 index.html · sw.js · manifest.webmanifest · .nojekyll

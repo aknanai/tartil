@@ -1,5 +1,11 @@
 # build-time source snapshots (re-fetchable via `build_data.py --fetch`)
 tools/_src_*
+# audio-splitter scratch: reference-text cache, local test audio/output
+tools/.ref_cache/
+tools/_test/
+# python
+__pycache__/
+*.pyc
 # os / editor cruft
 .DS_Store
 *~

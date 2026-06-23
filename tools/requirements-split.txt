@@ -1,0 +1,11 @@
+# Dependencies for tools/split_ayat.py (full-surah → per-ayah splitter).
+# Install on the GPU machine:  pip install -r tools/requirements-split.txt
+# Also required: a system `ffmpeg`/`ffprobe` on PATH (not a pip package).
+
+faster-whisper>=1.0.0   # pulls in ctranslate2 + a CUDA-capable torch on GPU boxes
+librosa>=0.10           # RMS-energy silence snapping (optional; --no-snap to skip)
+soundfile>=0.12         # librosa's audio backend
+numpy>=1.24
+
+# Optional, higher-accuracy alternative to Whisper-based alignment (not used by
+# default): a CTC forced aligner, e.g.  pip install ctc-forced-aligner
