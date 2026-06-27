@@ -3,7 +3,8 @@
    Tokens are tap-to-peek (reveal one briefly). */
 (function (BA) {
   const { el, clear, bareLetters } = BA.util;
-  const LEVELS = ['Full', 'Hide last', 'Hide half', 'First letters', 'Blank'];
+  const LEVEL_KEYS = ['level.full', 'level.hideLast', 'level.hideHalf', 'level.firstLetters', 'level.blank'];
+  const levelName = (i) => (BA.i18n ? BA.i18n.t(LEVEL_KEYS[i]) : LEVEL_KEYS[i]);
 
   function modeFor(level, i, n) {
     if (level >= 4) return 'blank';
@@ -44,5 +45,5 @@
     });
   }
 
-  BA.reveal = { render, LEVELS };
+  BA.reveal = { render, LEVEL_KEYS, levelName };
 })(window.BA = window.BA || {});

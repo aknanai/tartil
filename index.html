@@ -32,18 +32,18 @@ if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]debug\b
 <body>
 <!-- ░░░ top bar ░░░ -->
 <header class="topbar">
-  <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+  <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu" data-i18n-aria="aria.menu">☰</button>
   <a class="brand" href="#/home">
     <span class="brand-mark">☾</span>
     <span class="brand-name">Al-Baqarah <small>البقرة</small></span>
   </a>
   <div class="topbar-spacer"></div>
   <label class="riwayah-pick">
-    <span class="ri-label">Reading</span>
-    <select id="riwayahSelect" aria-label="Reading (riwāyah)"></select>
+    <span class="ri-label" data-i18n="topbar.reading">Reading</span>
+    <select id="riwayahSelect" aria-label="Reading (riwāyah)" data-i18n-aria="settings.reading"></select>
   </label>
-  <div class="streak-badge" id="streakBadge" title="Daily streak">🔥 <span id="streakNum">0</span></div>
-  <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  <div class="streak-badge" id="streakBadge" title="Daily streak" data-i18n-aria="aria.streak">🔥 <span id="streakNum">0</span></div>
+  <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" data-i18n-aria="aria.theme">🌙</button>
 </header>
 
 <div class="layout">
@@ -67,14 +67,14 @@ if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]debug\b
 <footer class="player" id="player" hidden>
   <div class="player-line" id="playerProgress"><i></i></div>
   <div class="player-row">
-    <button class="icon-btn" id="pPrev" aria-label="Previous ayah">⏮</button>
-    <button class="icon-btn play" id="pPlay" aria-label="Play / pause">▶</button>
-    <button class="icon-btn" id="pNext" aria-label="Next ayah">⏭</button>
+    <button class="icon-btn" id="pPrev" aria-label="Previous ayah" data-i18n-aria="aria.prev">⏮</button>
+    <button class="icon-btn play" id="pPlay" aria-label="Play / pause" data-i18n-aria="aria.playpause">▶</button>
+    <button class="icon-btn" id="pNext" aria-label="Next ayah" data-i18n-aria="aria.next">⏭</button>
     <div class="player-meta">
       <strong id="pTitle">—</strong>
       <span id="pSub" class="muted"></span>
     </div>
-    <button class="icon-btn" id="pStop" aria-label="Stop">■</button>
+    <button class="icon-btn" id="pStop" aria-label="Stop" data-i18n-aria="aria.stop">■</button>
   </div>
 </footer>
 
@@ -82,6 +82,7 @@ if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]debug\b
 
 <!-- load order = dependency order (classic scripts, shared window.BA namespace) -->
 <script src="./js/util.js"></script>
+<script src="./js/i18n.js"></script>
 <script src="./js/store.js"></script>
 <script src="./js/data.js"></script>
 <script src="./js/reciters.js"></script>

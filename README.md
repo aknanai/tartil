@@ -14,6 +14,10 @@ both **Ḥafṣ ʿan ʿĀṣim** and **Warsh ʿan Nāfiʿ** readings — text *a
 - **📊 Progress** — a 286-cell heatmap, % memorized, daily streak, and export/import backup.
 - **Two readings** — switch **Ḥafṣ ↔ Warsh** at the top; the Arabic text **and** the audio
   change together (Warsh differs from Ḥafṣ in the actual rasm, not just pronunciation).
+- **Interface in 5 languages** — the app’s own buttons/menus translate to **English, Français,
+  Español, اردو, العربية** (Settings → App language), with full **right-to-left** layout for
+  Urdu & Arabic. This is separate from the per-ayah meaning translation; the Qur’an text is never
+  touched. Strings live in `js/i18n.js`.
 - **Serene Mushaf** theme with **light/dark** mode, and an **offline download** so a reciter’s
   audio works with no signal (mosque / commute).
 - Progress is saved **only on your device** (localStorage). Back it up from the Progress tab.

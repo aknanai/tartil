@@ -5,7 +5,8 @@
   const { el, clear } = BA.util;
   (BA.views = BA.views || {}).review = {
     mount(sec) {
-      const { store, data, audio, reveal } = BA;
+      const { store, data, audio, reveal, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'review' });
       const ri = store.settings.riwayah;
       clear(sec);
@@ -26,21 +27,21 @@
       const bar = el('div', { class: 'meter', style: 'margin:.2rem 0 1rem' }, el('i', {}));
       const leftPill = el('span', { class: 'pill' }, '');
       const heading = el('div', { class: 'row spread' },
-        el('strong', {}, 'Review'), leftPill);
+        el('strong', {}, t('review.title')), leftPill);
       const badge = el('span', { class: 'pill' }, '');
       const arEl = el('div', { class: 'ar', dataset: { riwayah: ri } });
       const card = el('div', { class: 'ayah-card' }, arEl);
       const trBox = el('div', { class: 'tr-box' });
       const hint = el('div', { class: 'muted', style: 'font-size:.85rem;margin:.2rem 0 .8rem' }, '');
 
-      const showBtn = el('button', { class: 'btn', onclick: revealAll }, '👁 Show answer');
-      const loopBtn = el('button', { class: 'btn ghost', onclick: loop }, '🔁 Listen');
+      const showBtn = el('button', { class: 'btn', onclick: revealAll }, t('review.showAnswer'));
+      const loopBtn = el('button', { class: 'btn ghost', onclick: loop }, t('review.listen'));
       const preRow = el('div', { class: 'row', style: 'margin:.2rem 0 1rem' }, showBtn, loopBtn);
 
       const grades = el('div', { class: 'row', style: 'margin:.2rem 0 1rem', hidden: true },
-        el('button', { class: 'btn ghost', onclick: () => grade('again') }, '✗ Again'),
-        el('button', { class: 'btn', onclick: () => grade('good') }, '✓ Good'),
-        el('button', { class: 'btn gold', onclick: () => grade('easy') }, '⚡ Easy'));
+        el('button', { class: 'btn ghost', onclick: () => grade('again') }, t('review.again')),
+        el('button', { class: 'btn', onclick: () => grade('good') }, t('review.good')),
+        el('button', { class: 'btn gold', onclick: () => grade('easy') }, t('review.easy')));
 
       sec.append(
         el('div', { class: 'card' }, heading, bar,
@@ -54,7 +55,7 @@
         revealed = item.isNew;                          // new ayāt start revealed (you're learning them)
         leftPill.textContent = `${pos + 1} / ${total}`;
         bar.firstElementChild.style.width = (pos / total * 100).toFixed(1) + '%';
-        badge.textContent = item.isNew ? '🌱 New ayah' : '🔁 Due review';
+        badge.textContent = item.isNew ? t('review.newBadge') : t('review.dueBadge');
         badge.style.background = item.isNew ? 'var(--gold-soft)' : 'var(--border)';
         badge.style.color = 'var(--text)';
         clear(arEl);
@@ -63,9 +64,7 @@
         arEl.append(el('span', { class: 'ayah-num' }, n));
         clear(trBox);
         if (revealed) { const tr = BA.app.translationEl(n); if (tr) trBox.append(tr); }
-        hint.textContent = item.isNew
-          ? 'Read it, recite it a few times, then grade how well it sticks.'
-          : 'Recall the ayah from the hints (tap a word to peek), then show the answer.';
+        hint.textContent = item.isNew ? t('review.hintNew') : t('review.hintDue');
         showBtn.hidden = revealed;
         grades.hidden = !revealed;
         card.classList.remove('playing');
@@ -77,7 +76,7 @@
         clear(arEl);
         arEl.append(document.createTextNode(data.text(n, ri) + ' '), el('span', { class: 'ayah-num' }, n));
         clear(trBox); const tr = BA.app.translationEl(n); if (tr) trBox.append(tr);
-        showBtn.hidden = true; grades.hidden = false; hint.textContent = 'How well did you recall it?';
+        showBtn.hidden = true; grades.hidden = false; hint.textContent = t('review.howWell');
       }
 
       function loop() {
@@ -106,30 +105,29 @@
         sec.append(
           el('div', { class: 'card', style: 'text-align:center' },
             el('div', { style: 'font-size:2.2rem' }, '🎉'),
-            el('h2', { style: 'margin:.3rem 0' }, 'Review complete'),
-            el('div', { class: 'muted' }, `${reviewed} graded · ${tally.good + tally.easy} recalled · ${tally.again} to revisit`),
+            el('h2', { style: 'margin:.3rem 0' }, t('review.completeTitle')),
+            el('div', { class: 'muted' }, t('review.completeStats', { reviewed, recalled: tally.good + tally.easy, again: tally.again })),
             el('div', { class: 'muted', style: 'margin-top:.4rem' },
-              next ? `Next review due ${relDay(next)}.` : 'Nothing else scheduled — add new ayāt anytime.'),
+              next ? t('review.nextDue', { when: relDay(next) }) : t('review.nothingScheduled')),
             el('div', { class: 'row', style: 'justify-content:center;margin-top:1rem' },
-              el('button', { class: 'btn', onclick: () => BA.nav.go('progress') }, '📊 Progress'),
-              el('button', { class: 'btn ghost', onclick: () => BA.nav.go('listen') }, '🔁 Listen'))));
+              el('button', { class: 'btn', onclick: () => BA.nav.go('progress') }, t('review.progressBtn')),
+              el('button', { class: 'btn ghost', onclick: () => BA.nav.go('listen') }, t('review.listen')))));
       }
 
       function renderEmpty() {
         const next = store.nextDueTime();
         const news = store.newAyat(1).length > 0;
         sec.append(
-          el('h1', { class: 'page-title' }, 'Review'),
+          el('h1', { class: 'page-title' }, t('review.title')),
           el('div', { class: 'card', style: 'text-align:center' },
             el('div', { style: 'font-size:2.2rem' }, '✅'),
-            el('h2', { style: 'margin:.3rem 0' }, "You're all caught up"),
+            el('h2', { style: 'margin:.3rem 0' }, t('review.caughtUpTitle')),
             el('div', { class: 'muted' },
-              next ? `Nothing due right now. Next review ${relDay(next)}.`
-                   : (news ? 'No reviews due. Raise “new ayāt per day” in Settings to learn more today.'
-                           : 'Every ayah is scheduled — wonderful work. 🤲')),
+              next ? t('review.caughtUpNext', { when: relDay(next) })
+                   : (news ? t('review.caughtUpRaise') : t('review.caughtUpAll'))),
             el('div', { class: 'row', style: 'justify-content:center;margin-top:1rem' },
-              el('button', { class: 'btn', onclick: () => BA.nav.go('memorize') }, '🙈 Memorize'),
-              el('button', { class: 'btn ghost', onclick: () => BA.nav.go('listen') }, '🔁 Listen'))));
+              el('button', { class: 'btn', onclick: () => BA.nav.go('memorize') }, t('review.memorizeBtn')),
+              el('button', { class: 'btn ghost', onclick: () => BA.nav.go('listen') }, t('review.listen')))));
       }
 
       BA.app.onAyah((a) => { card && card.classList.toggle('playing', a === (queue[pos] && queue[pos].n)); });
@@ -142,6 +140,6 @@
     const today = BA.util.todayStr();
     const d = new Date(ms); const that = `${d.getFullYear()}-${BA.util.pad2(d.getMonth() + 1)}-${BA.util.pad2(d.getDate())}`;
     const n = BA.util.daysBetween(today, that);
-    return n <= 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`;
+    return n <= 0 ? BA.i18n.t('review.today') : n === 1 ? BA.i18n.t('review.tomorrow') : BA.i18n.t('review.inDays', { n });
   }
 })(window.BA = window.BA || {});

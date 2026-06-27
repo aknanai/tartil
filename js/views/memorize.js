@@ -3,7 +3,8 @@
   const { el, clear, clamp } = BA.util;
   (BA.views = BA.views || {}).memorize = {
     mount(sec) {
-      const { store, data, audio, reveal } = BA;
+      const { store, data, audio, reveal, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'memorize' });
       const ri = store.settings.riwayah;
       let n = clamp(store.last.ayah || 1, 1, data.count);
@@ -37,24 +38,24 @@
             el('button', { class: 'icon-btn', onclick: () => go(n - 1) }, '◀'),
             heading,
             el('button', { class: 'icon-btn', onclick: () => go(n + 1) }, '▶')),
-          el('div', { class: 'row' }, el('span', { class: 'muted' }, 'Go to'), jump)),
+          el('div', { class: 'row' }, el('span', { class: 'muted' }, t('memorize.goTo')), jump)),
         el('div', { class: 'field', style: 'margin-top:.5rem' },
-          el('label', {}, 'Hide level — tap a hidden word to peek'),
+          el('label', {}, t('memorize.hideLevelLabel')),
           el('div', { class: 'row' }, levelSlider, levelLabel)),
         el('div', { class: 'field', style: 'margin-top:.5rem' },
-          el('label', {}, 'Translation'),
+          el('label', {}, t('common.translation')),
           BA.app.makeLangSelect()));
 
       const actions = el('div', { class: 'row', style: 'margin:.2rem 0 1rem' },
-        el('button', { class: 'btn', onclick: loopAyah }, '🔁 Loop this ayah'),
-        el('button', { class: 'btn ghost', onclick: () => { level = 0; levelSlider.value = 0; store.setSetting('hideLevel', 0); render(); } }, '👁 Reveal'),
-        el('button', { class: 'btn gold', onclick: gotIt }, '✓ Got it'),
-        el('button', { class: 'btn ghost', onclick: missed }, '✗ Missed'),
+        el('button', { class: 'btn', onclick: loopAyah }, t('memorize.loop')),
+        el('button', { class: 'btn ghost', onclick: () => { level = 0; levelSlider.value = 0; store.setSetting('hideLevel', 0); render(); } }, t('memorize.reveal')),
+        el('button', { class: 'btn gold', onclick: gotIt }, t('memorize.gotIt')),
+        el('button', { class: 'btn ghost', onclick: missed }, t('memorize.missed')),
         statusPill);
 
       // ── search / jump bar ──
       const searchInput = el('input', { type: 'search', class: 'search-input', inputmode: 'search',
-        placeholder: 'Jump to ayah # or search words…', autocomplete: 'off' });
+        placeholder: t('memorize.searchPlaceholder'), autocomplete: 'off' });
       const results = el('div', { class: 'search-results', hidden: true });
       const searchCard = el('div', { class: 'card' },
         el('div', { class: 'search-wrap' }, el('span', { class: 'search-ic' }, '🔍'), searchInput), results);
@@ -66,7 +67,7 @@
         if (!q) { results.hidden = true; return; }
         const matches = data.search(q, ri, 25);
         results.hidden = false;
-        if (!matches.length) { results.append(el('div', { class: 'muted', style: 'padding:.5rem' }, 'No matching ayah')); return; }
+        if (!matches.length) { results.append(el('div', { class: 'muted', style: 'padding:.5rem' }, t('memorize.noMatch'))); return; }
         matches.forEach(m => {
           const snip = m.text.length > 80 ? m.text.slice(0, 80) + '…' : m.text;
           results.append(el('div', { class: 'search-result', onclick: () => pick(m.n) },
@@ -82,22 +83,22 @@
 
       const fallbackNote = canFallback
         ? el('div', { class: 'muted', style: 'font-size:.82rem;margin:-.3rem 0 1rem' },
-            `🔁 “${shortName(curRec)}” is a whole-surah recording — single-ayah loop uses “${shortName(paRec)}” (per-ayah) for now.`)
+            t('memorize.fallbackNote', { full: shortName(curRec), pa: shortName(paRec) }))
         : null;
       sec.append(searchCard, nav, card, trBox, actions, fallbackNote || el('span'));
 
       function render() {
-        levelLabel.textContent = reveal.LEVELS[level];
+        levelLabel.textContent = reveal.levelName(level);
         clear(arEl);
         if (level === 0) arEl.append(document.createTextNode(data.text(n, ri) + ' '));
         else reveal.render(arEl, data.words(n, ri), level);
         arEl.append(el('span', { class: 'ayah-num' }, n));
         clear(trBox);
         const tr = BA.app.translationEl(n); if (tr) trBox.append(tr);
-        heading.textContent = `Ayah ${n} / ${data.count}`;
+        heading.textContent = t('common.ayahOf', { n, total: data.count });
         jump.value = n;
         const st = store.status('2:' + n);
-        statusPill.textContent = ({ unseen: '◌ new', learning: '○ learning', solid: '◐ solid', mastered: '● mastered' })[st];
+        statusPill.textContent = ({ unseen: t('memorize.statusNew'), learning: t('memorize.statusLearning'), solid: t('memorize.statusSolid'), mastered: t('memorize.statusMastered') })[st];
         statusPill.style.background = st === 'mastered' ? 'var(--emerald)' : st === 'solid' ? '#7bbf97' : st === 'learning' ? 'var(--gold-soft)' : 'var(--border)';
         statusPill.style.color = st === 'mastered' ? '#fff' : 'var(--text)';
       }
@@ -107,12 +108,13 @@
         audio.configure({ reciterId: rec.id, riwayah: ri });
         audio.playSingle(n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
         card.classList.add('playing');
-        if (canFallback) BA.util.toast(`Looping with ${shortName(paRec)} — ${shortName(curRec)} is whole-surah`);
+        if (canFallback) BA.util.toast(t('memorize.toastLoopFallback', { name: shortName(paRec), full: shortName(curRec) }));
       }
       function gotIt() {
         const e = store.review('2:' + n, 'good'); BA.app.refreshStreak(); render();
-        if (e && e.status === 'mastered') BA.util.toast('🎉 Mastered ayah ' + n);
-        else BA.util.toast('Saved · ' + (e ? e.status : ''));
+        const st = e ? e.status : 'learning';
+        if (st === 'mastered') BA.util.toast(t('memorize.toastMastered', { n }));
+        else BA.util.toast(t('memorize.toastSaved', { status: t('statusWord.' + st) }));
       }
       function missed() { store.review('2:' + n, 'again'); BA.app.refreshStreak(); render(); }
 

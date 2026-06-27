@@ -1,11 +1,11 @@
 /* app.js — bootstrap + global wiring (theme, riwāyah, the persistent player, SW). */
 (function (BA) {
-  const { store, data, audio, nav, util } = BA;
+  const { store, data, audio, nav, util, i18n } = BA;
   let curAyah = 1;
   let highlighter = null;   // the active view's "an ayah started playing" hook
   let deferredPrompt = null; // captured Android/Chrome install prompt
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
-  window.addEventListener('appinstalled', () => { deferredPrompt = null; util.toast && util.toast('App installed ✓'); });
+  window.addEventListener('appinstalled', () => { deferredPrompt = null; util.toast && util.toast(i18n.t('app.appInstalled')); });
 
   function setTheme(t) {
     document.documentElement.dataset.theme = t;
@@ -48,11 +48,11 @@
       P.pPlay.textContent = (s === 'playing' || s === 'gap' || s === 'loading') ? '⏸' : '▶';
       if (s !== 'stopped') show();
     });
-    audio.on('loading', () => { show(); P.pSub.textContent = 'buffering…'; });
+    audio.on('loading', () => { show(); P.pSub.textContent = i18n.t('player.buffering'); });
     audio.on('ayahstart', (n, item) => {
       curAyah = n; store.setLast({ ayah: n });
       const r = audio.getReciter();
-      P.pTitle.textContent = item && item.isFull ? `Surah Al-Baqarah` : `Ayah ${n}`;
+      P.pTitle.textContent = item && item.isFull ? i18n.t('player.surah') : i18n.t('common.ayah', { n });
       P.pSub.textContent = (r ? r.name_en : '') + (item && item.isFull ? '' : ` · ${data.riwayahLabel(audio.getRiwayah())}`);
       show();
       if (highlighter) { try { highlighter(n, item); } catch (e) {} }
@@ -69,22 +69,30 @@
     reconfigure();
     nav.route(); // re-mount current view with new riwāyah
   }
+  function setUiLang(l) {
+    if (!i18n.has(l)) return;
+    i18n.setLang(l);
+    store.setSetting('uiLang', l);
+    i18n.apply();             // html dir/lang + static chrome
+    nav.buildSidebar();       // sidebar labels
+    nav.route();              // re-mount current view in the new language
+  }
   BA.app = {
-    setTheme, refreshStreak, onRiwayahChange, reconfigure,
+    setTheme, refreshStreak, onRiwayahChange, reconfigure, setUiLang,
     onAyah(fn) { highlighter = fn; },     // view registers a highlight hook (replaces previous)
     clearAyah() { highlighter = null; },
     get curAyah() { return curAyah; },
     // reusable translation-language <select>; changing it reloads & refreshes the view
     makeLangSelect() {
-      const sel = util.el('select', { 'aria-label': 'Translation language' });
+      const sel = util.el('select', { 'aria-label': i18n.t('common.translation') });
       data.LANGS.forEach(([v, label]) => {
-        const o = util.el('option', { value: v }, label);
+        const o = util.el('option', { value: v }, v === 'off' ? i18n.t('lang.arabicOnly') : label);
         if (v === store.settings.lang) o.selected = true;
         sel.append(o);
       });
       sel.addEventListener('change', async () => {
         store.setSetting('lang', sel.value);
-        if (sel.value !== 'off') { try { await data.loadTranslations(); } catch (e) { util.toast('Could not load translation'); } }
+        if (sel.value !== 'off') { try { await data.loadTranslations(); } catch (e) { util.toast(i18n.t('app.couldNotLoadTranslation')); } }
         nav.route();
       });
       return sel;
@@ -112,13 +120,15 @@
 
   async function boot() {
     setTheme(store.settings.theme || 'light');
+    i18n.setLang(store.settings.uiLang || 'en');
+    i18n.apply();
     audio.init(); initPlayer();
 
     const main = document.getElementById('main');
     try {
       await data.load();
     } catch (e) {
-      main.innerHTML = '<div class="card">Could not load the Qur’an data. If you opened the file directly, please serve the folder over HTTP (e.g. <code>python3 -m http.server</code>).</div>';
+      main.innerHTML = '<div class="card">' + i18n.t('app.dataLoadError') + '</div>';
       console.error(e); return;
     }
     fillRiwayahSelect();

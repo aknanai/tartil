@@ -7,7 +7,7 @@ const SHELL_FILES = [
   './assets/icon-maskable-512.png', './assets/apple-touch-icon.png',
   './assets/style.css', './assets/nav.js',
   './assets/fonts/scheherazade-400.woff2', './assets/fonts/scheherazade-700.woff2', './assets/fonts/amiri-quran.woff2',
-  './js/util.js', './js/store.js', './js/data.js', './js/reciters.js', './js/audio-engine.js', './js/reveal.js', './js/app.js',
+  './js/util.js', './js/i18n.js', './js/store.js', './js/data.js', './js/reciters.js', './js/audio-engine.js', './js/reveal.js', './js/app.js',
   './js/views/home.js', './js/views/review.js', './js/views/listen.js', './js/views/memorize.js', './js/views/test.js', './js/views/progress.js', './js/views/settings.js',
   './data/baqarah.json', './data/reciters.json', './data/credits.json', './data/translations.json',
 ];

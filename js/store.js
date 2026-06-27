@@ -6,7 +6,7 @@
     settings: {
       riwayah: 'hafs', reciter: 'husary_muallim',
       repsPerAyah: 3, rangeReps: 2, gapMs: 800, speed: 1,
-      theme: 'light', hideLevel: 0, font: 'scheherazade', lang: 'off',
+      theme: 'light', hideLevel: 0, font: 'scheherazade', lang: 'off', uiLang: 'en',
       dailyNew: 5,                        // how many fresh ayāt a Review session introduces per day
     },
     progress: {},                         // "2:3": {status, reviews, lastSeen, box, due, lastReview, firstSeen}

@@ -3,7 +3,8 @@
   const { el, clear } = BA.util;
   (BA.views = BA.views || {}).progress = {
     mount(sec) {
-      const { store, data, nav } = BA;
+      const { store, data, nav, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'progress' });
       clear(sec);
       const pct = store.percent(), c = store.counts();
@@ -13,7 +14,8 @@
         const st = store.status('2:' + n);
         heat.append(el('button', {
           type: 'button', role: 'listitem', dataset: { s: st },
-          title: `Ayah ${n} · ${st}`, 'aria-label': `Ayah ${n}, ${st} — study`,
+          title: `${t('common.ayah', { n })} · ${t('statusWord.' + st)}`,
+          'aria-label': `${t('common.ayah', { n })}, ${t('statusWord.' + st)}`,
           onclick: () => { store.setLast({ ayah: n }); nav.go('memorize'); },
         }));
       }
@@ -22,37 +24,37 @@
         onchange: e => importFile(e.target.files[0]) });
 
       sec.append(
-        el('h1', { class: 'page-title' }, 'Your progress'),
+        el('h1', { class: 'page-title' }, t('progress.title')),
         el('div', { class: 'grid2' },
-          mini(`${pct}%`, 'Memorized', el('div', { class: 'meter' }, el('i', { style: `width:${pct}%` }))),
-          mini(`🔥 ${store.streak.current || 0}`, `Streak · best ${store.streak.best || 0}`),
-          mini(`${c.mastered}`, 'Mastered'),
-          mini(`${c.solid}`, 'Solid')),
+          mini(`${pct}%`, t('progress.memorized'), el('div', { class: 'meter' }, el('i', { style: `width:${pct}%` }))),
+          mini(`🔥 ${store.streak.current || 0}`, t('progress.streakLabel', { n: store.streak.best || 0 })),
+          mini(`${c.mastered}`, t('progress.mastered')),
+          mini(`${c.solid}`, t('progress.solid'))),
 
         store.dueCount()
           ? el('div', { class: 'card' },
               el('div', { class: 'row spread' },
-                el('div', {}, el('strong', {}, `🎯 ${store.dueCount()} due for review`),
-                  el('div', { class: 'muted', style: 'font-size:.85rem' }, 'Spaced-repetition queue')),
-                el('button', { class: 'btn', onclick: () => nav.go('review') }, 'Start')))
+                el('div', {}, el('strong', {}, t('progress.dueForReview', { n: store.dueCount() })),
+                  el('div', { class: 'muted', style: 'font-size:.85rem' }, t('progress.dueSub'))),
+                el('button', { class: 'btn', onclick: () => nav.go('review') }, t('progress.start'))))
           : el('span'),
 
         el('div', { class: 'card' },
-          el('div', { class: 'row spread' }, el('h3', { style: 'margin:0' }, 'All 286 ayāt'),
-            el('span', { class: 'muted', style: 'font-size:.8rem' }, 'tap a cell to study it')),
+          el('div', { class: 'row spread' }, el('h3', { style: 'margin:0' }, t('progress.allAyat')),
+            el('span', { class: 'muted', style: 'font-size:.8rem' }, t('progress.tapCell'))),
           heat,
           el('div', { class: 'legend' },
-            leg('var(--border)', 'new'), leg('#e7c98a', 'learning'),
-            leg('#7bbf97', 'solid'), leg('var(--emerald)', 'mastered'))),
+            leg('var(--border)', t('progress.legendNew')), leg('#e7c98a', t('progress.legendLearning')),
+            leg('#7bbf97', t('progress.legendSolid')), leg('var(--emerald)', t('progress.legendMastered')))),
 
         el('div', { class: 'card' },
-          el('h3', {}, 'Backup & restore'),
+          el('h3', {}, t('progress.backupTitle')),
           el('div', { class: 'muted', style: 'font-size:.85rem;margin-bottom:.6rem' },
-            'Progress lives only on this device. Export a file to keep it safe or move it to another phone.'),
+            t('progress.backupDesc')),
           el('div', { class: 'row' },
-            el('button', { class: 'btn', onclick: exportFile }, '⬇ Export backup'),
-            el('button', { class: 'btn ghost', onclick: () => fileIn.click() }, '⬆ Import backup'),
-            el('button', { class: 'btn ghost', onclick: reset }, '⌫ Reset'),
+            el('button', { class: 'btn', onclick: exportFile }, t('progress.export')),
+            el('button', { class: 'btn ghost', onclick: () => fileIn.click() }, t('progress.import')),
+            el('button', { class: 'btn ghost', onclick: reset }, t('progress.reset')),
             fileIn))
       );
 
@@ -60,17 +62,17 @@
         const blob = new Blob([store.exportJSON()], { type: 'application/json' });
         const a = el('a', { href: URL.createObjectURL(blob), download: 'baqarah-hifz-backup.json' });
         document.body.append(a); a.click(); a.remove();
-        BA.util.toast('Backup downloaded');
+        BA.util.toast(t('progress.toastDownloaded'));
       }
       function importFile(file) {
         if (!file) return;
         const rd = new FileReader();
-        rd.onload = () => { try { store.importJSON(rd.result); BA.util.toast('Backup restored'); BA.app.refreshStreak(); BA.views.progress.mount(sec); } catch (e) { BA.util.toast('Invalid backup file'); } };
+        rd.onload = () => { try { store.importJSON(rd.result); BA.util.toast(t('progress.toastRestored')); BA.app.refreshStreak(); BA.views.progress.mount(sec); } catch (e) { BA.util.toast(t('progress.toastInvalid')); } };
         rd.readAsText(file);
       }
       function reset() {
-        if (confirm('Reset ALL progress and streak on this device? This cannot be undone.')) {
-          store.resetProgress(); BA.app.refreshStreak(); BA.views.progress.mount(sec); BA.util.toast("Progress reset");
+        if (confirm(t('progress.confirmReset'))) {
+          store.resetProgress(); BA.app.refreshStreak(); BA.views.progress.mount(sec); BA.util.toast(t('progress.toastReset'));
         }
       }
     },

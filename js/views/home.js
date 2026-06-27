@@ -3,54 +3,55 @@
   const { el, clear } = BA.util;
   (BA.views = BA.views || {}).home = {
     mount(sec) {
-      const { store, data, nav } = BA;
+      const { store, data, nav, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'home' });
       clear(sec);
       const pct = store.percent(), c = store.counts(), last = store.last.ayah || 1;
       const due = store.dueCount(), newRem = store.newRemaining();
 
       sec.append(
-        el('h1', { class: 'page-title' }, 'Memorize Surah Al-Baqarah ',
-          el('span', { class: 'pill' }, '286 ayāt')),
+        el('h1', { class: 'page-title' }, t('home.title') + ' ',
+          el('span', { class: 'pill' }, t('home.ayatPill'))),
 
         el('div', { class: 'card' },
           el('div', { class: 'row spread' },
             el('div', {},
-              el('div', { class: 'muted' }, "Today’s review"),
-              el('div', { html: `<strong style="font-size:1.2rem">${due} due</strong>${newRem ? ` · ${newRem} new` : ''}` })),
+              el('div', { class: 'muted' }, t('home.todaysReview')),
+              el('div', { html: `<strong style="font-size:1.2rem">${t('home.dueCount', { n: due })}</strong>${newRem ? t('home.newSuffix', { n: newRem }) : ''}` })),
             el('button', { class: 'btn', onclick: () => nav.go('review') },
-              (due || newRem) ? '🎯 Start review' : '✅ Caught up'))),
+              (due || newRem) ? t('home.startReview') : t('home.caughtUp')))),
 
         el('div', { class: 'card' },
           el('div', { class: 'bismillah' }, data.bismillah(store.settings.riwayah)),
           el('div', { class: 'row spread' },
             el('div', {},
-              el('div', { class: 'muted' }, 'Continue where you left off'),
-              el('div', { html: `<strong style="font-size:1.2rem">Ayah ${last}</strong>` })),
+              el('div', { class: 'muted' }, t('home.continueLabel')),
+              el('div', { html: `<strong style="font-size:1.2rem">${t('common.ayah', { n: last })}</strong>` })),
             el('div', { class: 'row' },
-              el('button', { class: 'btn', onclick: () => { store.setLast({ ayah: last }); nav.go('memorize'); } }, '▶ Continue'),
-              el('button', { class: 'btn ghost', onclick: () => nav.go('listen') }, '🔁 Listen')))),
+              el('button', { class: 'btn', onclick: () => { store.setLast({ ayah: last }); nav.go('memorize'); } }, t('home.continue')),
+              el('button', { class: 'btn ghost', onclick: () => nav.go('listen') }, t('home.listen'))))),
 
         el('div', { class: 'grid2' },
-          stat(`${pct}%`, 'Memorized', el('div', { class: 'meter' }, el('i', { style: `width:${pct}%` }))),
-          stat(`🔥 ${store.streak.current || 0}`, `Day streak · best ${store.streak.best || 0}`),
-          stat(`${c.mastered}`, 'Mastered'),
-          stat(`${c.learning + c.solid}`, 'In progress')),
+          stat(`${pct}%`, t('home.memorized'), el('div', { class: 'meter' }, el('i', { style: `width:${pct}%` }))),
+          stat(`🔥 ${store.streak.current || 0}`, t('home.streakLabel', { n: store.streak.best || 0 })),
+          stat(`${c.mastered}`, t('home.mastered')),
+          stat(`${c.learning + c.solid}`, t('home.inProgress'))),
 
         el('div', { class: 'card' },
-          el('h3', {}, 'How to use it'),
+          el('h3', {}, t('home.howTitle')),
           el('ul', { class: 'muted', style: 'margin:.2rem 0;padding-inline-start:1.1rem;line-height:1.9' },
-            el('li', { html: '<b>Listen &amp; Loop</b> — pick a range (e.g. 1–5), set repeats, and let it loop. Listen-and-repeat is the backbone of ḥifẓ.' }),
-            el('li', { html: '<b>Memorize</b> — hide the words gradually (last word → half → first letters → blank), peek when stuck, mark each ayah.' }),
-            el('li', { html: '<b>Test</b> — fill the blanks and recall the next ayah.' }),
-            el('li', { html: 'Switch <b>Reading</b> (Ḥafṣ / Warsh) at the top — text <i>and</i> audio change together.' }))),
+            el('li', { html: t('home.how1') }),
+            el('li', { html: t('home.how2') }),
+            el('li', { html: t('home.how3') }),
+            el('li', { html: t('home.how4') }))),
 
         el('div', { class: 'card' },
-          el('h3', {}, 'Sources & credits'),
+          el('h3', {}, t('home.creditsTitle')),
           el('div', { class: 'muted', style: 'font-size:.85rem;line-height:1.8' },
-            el('div', { html: 'Ḥafṣ text — <b>Tanzil Project</b> (tanzil.net). Warsh text — QPC Warsh rasm, remapped to the standard ayah numbering.' }),
-            el('div', { html: 'Per-ayah audio — <b>EveryAyah</b>. Full-surah Warsh — <b>mp3quran.net</b>. Font — Scheherazade New / Amiri (OFL).' }),
-            el('div', { class: 'muted', style: 'margin-top:.4rem' }, 'Your progress is saved only on this device. Back it up in Settings.')))
+            el('div', { html: t('home.credits1') }),
+            el('div', { html: t('home.credits2') }),
+            el('div', { class: 'muted', style: 'margin-top:.4rem' }, t('home.credits3'))))
       );
     },
   };

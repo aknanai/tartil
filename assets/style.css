@@ -251,3 +251,15 @@ input[type=range]{accent-color:var(--accent);}
 .spin{width:1.1em;height:1.1em;border:2px solid var(--border);border-top-color:var(--accent);
   border-radius:50%;display:inline-block;animation:rot .7s linear infinite;vertical-align:-2px;}
 @keyframes rot{to{transform:rotate(360deg);}}
+
+/* ---------- RTL interface (Arabic / Urdu app language) ----------
+   Flex & grid mirror automatically under dir=rtl; the Arabic ayah text keeps its
+   own direction:rtl regardless. Only the off-canvas mobile drawer needs flipping. */
+html[dir="rtl"] .sidebar{
+  left:auto;right:0;border-right:none;border-left:1px solid var(--border);
+  transform:translateX(105%);
+}
+html[dir="rtl"] .sidebar.open{transform:none;}
+/* Urdu UI reads better with a slightly taller line and the Arabic-capable font */
+html[lang="ur"]{--ui-font:'Scheherazade New','Segoe UI',system-ui,sans-serif;}
+html[lang="ur"] body{line-height:1.7;}

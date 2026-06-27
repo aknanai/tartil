@@ -4,16 +4,17 @@
   const { el, clear, shuffle, clamp } = BA.util;
 
   const MODES = [
-    { id: 'blank',  label: 'Fill the blank' },
-    { id: 'type',   label: 'Type the word' },
-    { id: 'next',   label: 'Next ayah' },
-    { id: 'audio',  label: 'Listen & recall' },
-    { id: 'recite', label: 'Recite' },
+    { id: 'blank',  key: 'test.fillBlank' },
+    { id: 'type',   key: 'test.typeWord' },
+    { id: 'next',   key: 'test.nextAyah' },
+    { id: 'audio',  key: 'test.listenRecall' },
+    { id: 'recite', key: 'test.recite' },
   ];
 
   (BA.views = BA.views || {}).test = {
     mount(sec) {
-      const { store, data, audio } = BA;
+      const { store, data, audio, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'test' });
       const ri = store.settings.riwayah;
       let mode = 'blank', score = { right: 0, total: 0 };
@@ -31,7 +32,7 @@
       const tabs = el('div', { class: 'seg', style: 'margin-bottom:.4rem' });
       const scoreEl = el('span', { class: 'pill' }, '');
       const qbox = el('div', { class: 'card' });
-      const nextBtn = el('button', { class: 'btn', onclick: question }, 'New question →');
+      const nextBtn = el('button', { class: 'btn', onclick: question }, t('test.newQuestion'));
       sec.append(
         el('div', { class: 'row spread' }, tabs, scoreEl),
         qbox,
@@ -42,9 +43,9 @@
         MODES.forEach(m => tabs.append(el('button', {
           class: 'seg-btn' + (mode === m.id ? ' on' : ''), type: 'button',
           onclick: () => { if (mode !== m.id) { mode = m.id; renderTabs(); question(); } },
-        }, m.label)));
+        }, t(m.key))));
       }
-      function updateScore() { scoreEl.textContent = `Score ${score.right}/${score.total}`; }
+      function updateScore() { scoreEl.textContent = t('test.score', { right: score.right, total: score.total }); }
       function gotRight(ok) { score.total++; if (ok) score.right++; updateScore(); }
 
       function question() {
@@ -78,7 +79,7 @@
         const slot = el('span', { class: 'blank-input' }, '____');
         const opts = shuffle([answer, ...distractorWords(answer, n, 3)]);
         qbox.append(
-          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, `Ayah ${n} — choose the missing word`),
+          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, t('test.chooseMissing', { n })),
           ayahWithBlank(n, bi, slot),
           el('div', { class: 'row', style: 'margin-top:.8rem;flex-wrap:wrap' },
             ...opts.map(o => el('button', { class: 'choice', onclick: ev => answerChoice(ev.target, o === answer, () => { slot.textContent = answer; }) }, o))));
@@ -100,17 +101,17 @@
           const ok = BA.util.normalizeArabic(input.value) === BA.util.normalizeArabic(answer);
           input.disabled = true;
           input.style.borderBottomColor = ok ? 'var(--ok)' : 'var(--bad)';
-          feedback.innerHTML = ok ? '✓ Correct' : `✗ Answer: <b class="ar" style="font-size:1.2rem" dir="rtl">${answer}</b>`;
+          feedback.innerHTML = ok ? t('test.correct') : `${t('test.answerLabel')} <b class="ar" style="font-size:1.2rem" dir="rtl">${answer}</b>`;
           gotRight(ok);
         };
         input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
         qbox.append(
-          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, `Ayah ${n} — type the missing word (ḥarakāt optional)`),
+          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, t('test.typePrompt', { n })),
           ayahWithBlank(n, bi, input),
           el('div', { class: 'row', style: 'margin-top:.8rem' },
-            el('button', { class: 'btn', onclick: submit }, 'Check'),
-            el('button', { class: 'btn ghost', onclick: () => { input.value = answer; submit(); } }, 'Reveal'),
-            el('button', { class: 'icon-btn', title: 'Hear the ayah', onclick: () => playAyah(n) }, '🔊')),
+            el('button', { class: 'btn', onclick: submit }, t('test.check')),
+            el('button', { class: 'btn ghost', onclick: () => { input.value = answer; submit(); } }, t('test.reveal')),
+            el('button', { class: 'icon-btn', title: t('test.hearAyah'), onclick: () => playAyah(n) }, '🔊')),
           feedback);
         setTimeout(() => input.focus(), 0);
       }
@@ -121,7 +122,7 @@
         const correct = n + 1;
         const opts = shuffle([correct, ...distractorNums(correct, n, 3)]);
         qbox.append(
-          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, `This is ayah ${n}. Which ayah comes next?`),
+          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, t('test.whichNext', { n })),
           el('div', { class: 'ar', dataset: { riwayah: ri } }, data.text(n, ri) + ' ', el('span', { class: 'ayah-num' }, n)),
           el('div', { style: 'margin-top:.7rem' },
             ...opts.map(c => el('div', { class: 'order-item', style: 'cursor:pointer',
@@ -131,7 +132,7 @@
       // ── MODE: listen & recall (audio cue → which ayah comes next) ──
       function qAudio() {
         if (!BA.reciters.canLoop(loopRec)) {
-          qbox.append(el('div', { class: 'muted' }, 'Audio recall needs a per-ayah reciter — pick one in Settings.'));
+          qbox.append(el('div', { class: 'muted' }, t('test.audioNeedsPerAyah')));
           return;
         }
         const n = 1 + Math.floor(Math.random() * (data.count - 1));
@@ -140,10 +141,10 @@
         const rev = el('div', { class: 'ar', dataset: { riwayah: ri }, hidden: true },
           data.text(n, ri) + ' ', el('span', { class: 'ayah-num' }, n));
         qbox.append(
-          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, 'Listen, then choose which ayah comes next'),
+          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, t('test.listenThenChoose')),
           el('div', { class: 'row', style: 'margin:.4rem 0 .9rem' },
-            el('button', { class: 'btn', onclick: () => playAyah(n) }, '🔊 Play the ayah'),
-            el('button', { class: 'btn ghost', onclick: () => { rev.hidden = !rev.hidden; } }, '👁 Show its text')),
+            el('button', { class: 'btn', onclick: () => playAyah(n) }, t('test.playAyah')),
+            el('button', { class: 'btn ghost', onclick: () => { rev.hidden = !rev.hidden; } }, t('test.showText'))),
           rev,
           el('div', { style: 'margin-top:.7rem' },
             ...opts.map(c => el('div', { class: 'order-item', style: 'cursor:pointer',
@@ -160,15 +161,15 @@
         const full = el('div', { class: 'ar', dataset: { riwayah: ri }, hidden: true },
           data.text(n, ri) + ' ', el('span', { class: 'ayah-num' }, n));
         const grades = el('div', { class: 'row', style: 'margin-top:.8rem', hidden: true },
-          el('button', { class: 'btn gold', onclick: () => selfGrade(n, true) }, '✓ Got it'),
-          el('button', { class: 'btn ghost', onclick: () => selfGrade(n, false) }, '✗ Struggled'));
-        const reveal = el('button', { class: 'btn', onclick: () => { full.hidden = false; grades.hidden = false; reveal.hidden = true; } }, '👁 Reveal answer');
+          el('button', { class: 'btn gold', onclick: () => selfGrade(n, true) }, t('memorize.gotIt')),
+          el('button', { class: 'btn ghost', onclick: () => selfGrade(n, false) }, t('test.struggled')));
+        const reveal = el('button', { class: 'btn', onclick: () => { full.hidden = false; grades.hidden = false; reveal.hidden = true; } }, t('test.revealAnswer'));
 
         qbox.append(
-          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, `Recite ayah ${n} from memory, then check yourself`),
+          el('div', { class: 'muted', style: 'margin-bottom:.4rem' }, t('test.recitePrompt', { n })),
           prompt, full,
           el('div', { class: 'row', style: 'margin-top:.6rem' },
-            reveal, el('button', { class: 'icon-btn', title: 'Hear it', onclick: () => playAyah(n) }, '🔊')),
+            reveal, el('button', { class: 'icon-btn', title: t('test.hearIt'), onclick: () => playAyah(n) }, '🔊')),
           recorderUI(),
           grades);
       }
@@ -176,7 +177,7 @@
         store.review('2:' + n, ok ? 'good' : 'again');
         BA.app.refreshStreak();
         gotRight(ok);
-        BA.util.toast(ok ? 'Saved — scheduled for review ✓' : 'No worries — back in the queue');
+        BA.util.toast(ok ? t('test.selfGradeOk') : t('test.selfGradeNo'));
         question();
       }
 
@@ -186,7 +187,7 @@
         if (!supported) return el('span');
         let rec = null, chunks = [], url = null;
         const player = el('audio', { controls: true, style: 'display:none;margin-top:.5rem;width:100%' });
-        const btn = el('button', { class: 'btn ghost' }, '● Record yourself');
+        const btn = el('button', { class: 'btn ghost' }, t('test.recordYourself'));
         btn.addEventListener('click', async () => {
           if (rec && rec.state === 'recording') { rec.stop(); return; }
           try {
@@ -198,10 +199,10 @@
               if (url) URL.revokeObjectURL(url);
               url = URL.createObjectURL(new Blob(chunks, { type: rec.mimeType || 'audio/webm' }));
               player.src = url; player.style.display = 'block';
-              btn.textContent = '● Record yourself'; btn.classList.remove('gold');
+              btn.textContent = t('test.recordYourself'); btn.classList.remove('gold');
             };
-            rec.start(); btn.textContent = '■ Stop recording'; btn.classList.add('gold');
-          } catch (e) { BA.util.toast('Microphone not available'); }
+            rec.start(); btn.textContent = t('test.stopRecording'); btn.classList.add('gold');
+          } catch (e) { BA.util.toast(t('test.micUnavailable')); }
         });
         return el('div', { style: 'margin-top:.6rem' }, btn, player);
       }
@@ -213,7 +214,7 @@
         node.classList.add(isRight ? 'right' : 'wrong');
         gotRight(isRight);
         if (onReveal) onReveal();
-        if (!isRight) BA.util.toast('Not quite — try the next one');
+        if (!isRight) BA.util.toast(t('test.notQuite'));
       }
       function firstWords(n) {
         const ws = data.words(n, ri);

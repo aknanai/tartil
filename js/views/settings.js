@@ -6,7 +6,8 @@
 
   (BA.views = BA.views || {}).settings = {
     mount(sec) {
-      const { store, data } = BA;
+      const { store, data, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'settings' });
       const s = store.settings;
       clear(sec);
@@ -39,69 +40,77 @@
 
       // theme + font
       const themeBtns = el('div', { class: 'row' },
-        themeBtn('light', '☀️ Light'), themeBtn('dark', '🌙 Dark'));
+        themeBtn('light', t('settings.themeLight')), themeBtn('dark', t('settings.themeDark')));
       const fontSel = el('select', { onchange: () => { store.setSetting('font', fontSel.value); applyFont(fontSel.value); } });
-      [['scheherazade', 'Scheherazade New (covers Ḥafṣ + Warsh)'], ['amiri', 'Amiri Quran (best for Ḥafṣ)']]
+      [['scheherazade', t('settings.fontScheherazade')], ['amiri', t('settings.fontAmiri')]]
         .forEach(([v, l]) => { const o = el('option', { value: v }, l); if (v === (s.font || 'scheherazade')) o.selected = true; fontSel.append(o); });
 
       // offline
       const r = data.reciter(s.reciter);
       const dlInfo = el('div', { class: 'muted', style: 'font-size:.82rem;margin:.3rem 0' });
       const dlBar = el('div', { class: 'meter', style: 'margin:.4rem 0' }, el('i', {}));
-      const dlBtn = el('button', { class: 'btn', onclick: () => downloadReciter(r, dlBtn, dlBar, dlInfo) }, '⬇ Download for offline');
-      const clrBtn = el('button', { class: 'btn ghost', onclick: clearAudio }, 'Clear cached audio');
+      const dlBtn = el('button', { class: 'btn', onclick: () => downloadReciter(r, dlBtn, dlBar, dlInfo) }, t('settings.download'));
+      const clrBtn = el('button', { class: 'btn ghost', onclick: clearAudio }, t('settings.clearAudio'));
+
+      // app interface language (separate from the Qur'an-meaning language above)
+      const langSel = el('select', { onchange: () => BA.app.setUiLang(langSel.value) });
+      i18n.LANGS.forEach(([v, label]) => { const o = el('option', { value: v }, label); if (v === i18n.lang) o.selected = true; langSel.append(o); });
 
       sec.append(
-        el('h1', { class: 'page-title' }, 'Settings'),
+        el('h1', { class: 'page-title' }, t('settings.title')),
         installCard(),
-        el('div', { class: 'card' }, el('h3', {}, 'Reading & audio'),
-          field('Reading (riwāyah)', riSel),
-          field('Default reciter', recSel)),
-        el('div', { class: 'card' }, el('h3', {}, '🌐 Translation'),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.appLangTitle')),
+          el('div', { class: 'muted', style: 'font-size:.84rem;margin-bottom:.5rem' }, t('settings.appLangDesc')),
+          field(t('settings.appLanguage'), langSel)),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.readingAudio')),
+          field(t('settings.reading'), riSel),
+          field(t('settings.defaultReciter'), recSel)),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.translationTitle')),
           el('div', { class: 'muted', style: 'font-size:.84rem;margin-bottom:.5rem' },
-            'Show the meaning under each ayah (Listen & Memorize). This is a translation/interpretation — the Arabic Qur’an text itself is never changed.'),
-          field('Language', BA.app.makeLangSelect()),
+            t('settings.translationDesc')),
+          field(t('common.language'), BA.app.makeLangSelect()),
           (s.lang !== 'off' && data.langMeta(s.lang))
-            ? el('div', { class: 'muted', style: 'font-size:.8rem;margin-top:.4rem' }, 'Source: ' + data.langMeta(s.lang).source)
+            ? el('div', { class: 'muted', style: 'font-size:.8rem;margin-top:.4rem' }, t('settings.source', { src: data.langMeta(s.lang).source }))
             : el('span')),
-        el('div', { class: 'card' }, el('h3', {}, '🎯 Review (spaced repetition)'),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.reviewTitle')),
           el('div', { class: 'muted', style: 'font-size:.84rem;margin-bottom:.5rem' },
-            'The Review tab schedules each ayah on a spacing ladder (1 → 3 → 7 → 16 → 40 days) and surfaces what’s due. This sets how many brand-new ayāt a session introduces per day.'),
-          field('New ayāt per day', dailyNew)),
-        el('div', { class: 'card' }, el('h3', {}, 'Loop defaults'),
-          el('div', { class: 'grid2' }, field('Repeat each ayah', reps), field('Loop the range', rng),
-            field('Gap between repeats', el('div', { class: 'row' }, gap, gapV)), field('Speed', speedBtns))),
-        el('div', { class: 'card' }, el('h3', {}, 'Appearance'),
-          field('Theme', themeBtns), field('Arabic font', fontSel)),
-        el('div', { class: 'card' }, el('h3', {}, 'Offline'),
+            t('settings.reviewDesc')),
+          field(t('settings.newPerDay'), dailyNew)),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.loopDefaults')),
+          el('div', { class: 'grid2' }, field(t('listen.repeatEach'), reps), field(t('listen.loopRange'), rng),
+            field(t('listen.gap'), el('div', { class: 'row' }, gap, gapV)), field(t('common.speed'), speedBtns))),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.appearance')),
+          field(t('settings.theme'), themeBtns), field(t('settings.arabicFont'), fontSel)),
+        el('div', { class: 'card' }, el('h3', {}, t('settings.offline')),
           el('div', { class: 'muted', style: 'font-size:.85rem' },
-            r && R.canLoop(r) ? `Save all 286 ayāt of “${r.name_en}” on this device (~35–45 MB) so loops work with no signal.`
-                              : `Save the whole-surah recording of “${r ? r.name_en : ''}” (~30–40 MB) for offline listening.`),
+            r && R.canLoop(r) ? t('settings.offlinePerAyah', { name: r.name_en })
+                              : t('settings.offlineFull', { name: r ? r.name_en : '' })),
           dlInfo, dlBar, el('div', { class: 'row' }, dlBtn, clrBtn))
       );
 
-      function themeBtn(t, label) {
-        return el('button', { class: 'btn ' + (document.documentElement.dataset.theme === t ? '' : 'ghost') + ' sm',
-          onclick: () => { BA.app.setTheme(t); BA.views.settings.mount(sec); } }, label);
+      function themeBtn(tName, label) {
+        return el('button', { class: 'btn ' + (document.documentElement.dataset.theme === tName ? '' : 'ghost') + ' sm',
+          onclick: () => { BA.app.setTheme(tName); BA.views.settings.mount(sec); } }, label);
       }
     },
   };
 
   function installCard() {
+    const t = BA.i18n.t;
     if (BA.app.isStandalone()) {
-      return el('div', { class: 'card' }, el('h3', {}, '📲 Installed'),
-        el('div', { class: 'muted', style: 'font-size:.85rem' }, 'You’re running the installed app. Download a reciter below to use it fully offline.'));
+      return el('div', { class: 'card' }, el('h3', {}, t('settings.installedTitle')),
+        el('div', { class: 'muted', style: 'font-size:.85rem' }, t('settings.installedDesc')));
     }
     const body = el('div', { class: 'muted', style: 'font-size:.85rem' });
-    const card = el('div', { class: 'card' }, el('h3', {}, '📲 Install app'), body);
+    const card = el('div', { class: 'card' }, el('h3', {}, t('settings.installTitle')), body);
     if (BA.app.canInstall()) {
-      body.append('Add Al-Baqarah to your home screen for full-screen, app-like use that works offline.',
+      body.append(t('settings.installCanDesc'),
         el('div', { class: 'row', style: 'margin-top:.55rem' },
-          el('button', { class: 'btn', onclick: () => BA.app.promptInstall() }, '⬇ Install app')));
+          el('button', { class: 'btn', onclick: () => BA.app.promptInstall() }, t('settings.installBtn'))));
     } else if (BA.app.isIOS()) {
-      body.append(el('div', { html: 'On iPhone/iPad: open in <b>Safari</b>, tap the <b>Share</b> button (⬆️ box-with-arrow), then choose <b>“Add to Home Screen”</b>.' }));
+      body.append(el('div', { html: t('settings.installIOS') }));
     } else {
-      body.append(el('div', { html: 'Use your browser menu → <b>Install app</b> / <b>Add to Home Screen</b> (works in Chrome, Edge, Safari, Samsung Internet).' }));
+      body.append(el('div', { html: t('settings.installOther') }));
     }
     return card;
   }
@@ -111,7 +120,8 @@
   }
 
   async function downloadReciter(r, btn, bar, info) {
-    if (!('caches' in window)) { BA.util.toast('Offline storage needs HTTPS (works once deployed).'); return; }
+    const t = BA.i18n.t;
+    if (!('caches' in window)) { BA.util.toast(t('settings.toastNeedHttps')); return; }
     if (!r) return;
     btn.disabled = true;
     const urls = R.canLoop(r) ? R.allAyahUrls(r, BA.data.count) : [R.surahUrl(r)];
@@ -125,15 +135,15 @@
         try { const resp = await fetch(u, { mode: 'cors' }); if (resp.ok) await cache.put(u, resp.clone()); else failed++; }
         catch (e) { failed++; }
         done++; fill.style.width = (done / total * 100).toFixed(1) + '%';
-        info.textContent = `Downloaded ${done}/${total}${failed ? ' · ' + failed + ' failed' : ''}`;
+        info.textContent = t('settings.downloaded', { done, total, failed: failed ? t('settings.failedSuffix', { n: failed }) : '' });
       }
     }
     await Promise.all([worker(), worker(), worker(), worker()]); // small concurrency
     btn.disabled = false;
-    BA.util.toast(failed ? `Saved with ${failed} skipped` : 'Saved for offline ✓');
+    BA.util.toast(failed ? t('settings.toastSavedSkipped', { n: failed }) : t('settings.toastSavedOffline'));
   }
   async function clearAudio() {
-    if ('caches' in window) { await caches.delete(AUDIO_CACHE); BA.util.toast('Cached audio cleared'); }
+    if ('caches' in window) { await caches.delete(AUDIO_CACHE); BA.util.toast(BA.i18n.t('settings.toastAudioCleared')); }
   }
 
   function field(label, control) { return el('div', { class: 'field' }, el('label', {}, label), control); }

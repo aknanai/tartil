@@ -3,7 +3,8 @@
   const { el, clear, clamp } = BA.util;
   (BA.views = BA.views || {}).listen = {
     mount(sec) {
-      const { store, data, audio } = BA;
+      const { store, data, audio, i18n } = BA;
+      const t = i18n.t;
       store.setLast({ view: 'listen' });
       const ri = store.settings.riwayah;
       const s = store.settings;
@@ -12,16 +13,16 @@
       // --- reciter <select> filtered to current riwāyah ---
       const recSel = el('select', { onchange: () => { store.setSetting('reciter', recSel.value); BA.app.reconfigure(); syncCaps(); } });
       data.recitersFor(ri).forEach(r => {
-        const o = el('option', { value: r.id }, r.name_en + (r.capability === 'full-surah' ? ' — whole surah' : ''));
+        const o = el('option', { value: r.id }, r.name_en + (r.capability === 'full-surah' ? t('listen.wholeSurahSuffix') : ''));
         if (r.id === s.reciter) o.selected = true;
         recSel.append(o);
       });
       if (!data.recitersFor(ri).some(r => r.id === s.reciter)) recSel.selectedIndex = 0;
 
-      const fromI = numField('From', store.last.rangeFrom || 1);
-      const toI = numField('To', store.last.rangeTo || 5);
-      const repsI = numField('Repeat each ayah', s.repsPerAyah, 1, 20);
-      const rangeI = numField('Loop the range', s.rangeReps, 1, 50);
+      const fromI = numField(t('listen.from'), store.last.rangeFrom || 1);
+      const toI = numField(t('listen.to'), store.last.rangeTo || 5);
+      const repsI = numField(t('listen.repeatEach'), s.repsPerAyah, 1, 20);
+      const rangeI = numField(t('listen.loopRange'), s.rangeReps, 1, 50);
       const gap = el('input', { type: 'range', min: 0, max: 4000, step: 100, value: s.gapMs });
       const gapVal = el('span', { class: 'muted' }, (s.gapMs / 1000).toFixed(1) + 's');
       gap.addEventListener('input', () => gapVal.textContent = (gap.value / 1000).toFixed(1) + 's');
@@ -37,18 +38,18 @@
       renderSpeed();
 
       const capNote = el('div', { class: 'muted', style: 'font-size:.82rem' });
-      const playBtn = el('button', { class: 'btn', onclick: play }, '▶ Play loop');
+      const playBtn = el('button', { class: 'btn', onclick: play }, t('listen.play'));
 
       const controls = el('div', { class: 'card' },
-        el('h3', {}, '🔁 Listen & Loop'),
+        el('h3', {}, t('listen.title')),
         el('div', { class: 'grid2' },
-          field('Reciter', recSel),
+          field(t('common.reciter'), recSel),
           fromI.wrap, toI.wrap, repsI.wrap, rangeI.wrap,
-          field('Gap between repeats', el('div', { class: 'row' }, gap, gapVal)),
-          field('Speed', speedBtns),
-          field('Translation', BA.app.makeLangSelect())),
+          field(t('listen.gap'), el('div', { class: 'row' }, gap, gapVal)),
+          field(t('common.speed'), speedBtns),
+          field(t('common.translation'), BA.app.makeLangSelect())),
         el('div', { class: 'row', style: 'margin-top:.6rem' }, playBtn,
-          el('button', { class: 'btn ghost', onclick: () => { audio.stop(); } }, '■ Stop')),
+          el('button', { class: 'btn ghost', onclick: () => { audio.stop(); } }, t('common.stop'))),
         capNote);
 
       const list = el('div', {});
@@ -72,9 +73,7 @@
         const r = data.reciter(recSel.value);
         const full = r && r.capability === 'full-surah';
         [repsI.input, rangeI.input, gap].forEach(x => x.disabled = full);
-        capNote.textContent = full
-          ? `${r.name_en} is published as a whole-surah recording — it plays the entire surah (per-ayah looping isn’t available for this voice).`
-          : '';
+        capNote.textContent = full ? t('listen.capNote', { name: r.name_en }) : '';
       }
 
       function play() {
