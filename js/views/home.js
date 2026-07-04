@@ -31,7 +31,8 @@
               el('div', { html: `<strong style="font-size:1.2rem">${t('common.ayah', { n: last })}</strong>` })),
             el('div', { class: 'row' },
               el('button', { class: 'btn', onclick: () => { store.setLast({ ayah: last }); nav.go('memorize'); } }, t('home.continue')),
-              el('button', { class: 'btn ghost', onclick: () => nav.go('listen') }, t('home.listen'))))),
+              el('button', { class: 'btn ghost', onclick: () => nav.go('listen') }, t('home.listen')),
+              el('button', { class: 'btn ghost', onclick: () => nav.go('drill') }, t('home.drill'))))),
 
         el('div', { class: 'grid2' },
           stat(`${pct}%`, t('home.memorized'), el('div', { class: 'meter' }, el('i', { style: `width:${pct}%` }))),

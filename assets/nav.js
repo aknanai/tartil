@@ -6,6 +6,7 @@
     { id: 'review',   ic: '🎯', group: 'memorize' },
     { id: 'listen',   ic: '🔁', group: 'memorize' },
     { id: 'memorize', ic: '🙈', group: 'memorize' },
+    { id: 'drill',    ic: '🏗️', group: 'memorize' },
     { id: 'test',     ic: '✅', group: 'memorize' },
     { id: 'progress', ic: '📊', group: 'you' },
     { id: 'settings', ic: '⚙️', group: 'you' },
