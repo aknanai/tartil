@@ -1,23 +1,24 @@
 {
+  "scope": "Whole Qur'an — all 114 surahs, Ḥafṣ and Warsh readings.",
   "text": [
     {
       "riwayah": "hafs",
-      "source": "Tanzil Project",
+      "source": "Tanzil Project (Uthmani, v1.1)",
       "url": "https://tanzil.net",
-      "license": "Verbatim redistribution permitted with attribution; do not modify the text."
+      "license": "Creative Commons Attribution 3.0; verbatim redistribution with attribution — do not modify the text."
     },
     {
       "riwayah": "warsh",
       "source": "aziz011133/quran_warsh (Warsh ʿan Nāfiʿ, QPC rasm)",
       "url": "https://github.com/aziz011133/quran_warsh",
-      "note": "Remapped from Madani (285) to Kufan (286) numbering to align with per-ayah audio."
+      "note": "Remapped per surah from Madani (6214) to Kufan (6236) numbering to align with per-ayah audio. Alignment report: tools/warsh_align_report.json. Text itself is never modified."
     }
   ],
   "audio": [
     {
       "source": "EveryAyah",
       "url": "https://everyayah.com",
-      "use": "per-ayah recitations (Hafs + Warsh) for the repeat/loop engine"
+      "use": "per-ayah recitations (Ḥafṣ + Warsh) for the repeat/loop engine, all 114 surahs"
     },
     {
       "source": "mp3quran.net",
