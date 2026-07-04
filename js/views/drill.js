@@ -152,9 +152,20 @@
               field(t('drill.chainLevel'), levelSel(chainLevel, v => chainLevel = v))),
             perAyahNote || el('span'),
             el('div', { class: 'row', style: 'margin-top:.7rem' },
-              el('button', { class: 'btn', onclick: () => start() }, t('drill.start')))),
+              el('button', { class: 'btn', onclick: () => start() }, t('drill.start')),
+              el('button', { class: 'btn ghost', onclick: saveRange }, t('drill.saveRange')))),
           editorCard);
         renderEditor();
+      }
+
+      async function saveRange() {
+        const rec = data.reciter(recId);
+        if (!rec || rec.capability !== 'per-ayah') { BA.util.toast(t('drill.perAyahOnly')); return; }
+        const urls = []; for (let a = from; a <= to; a++) urls.push(BA.reciters.ayahUrl(rec, surah, a));
+        BA.util.toast(t('drill.saving', { n: urls.length }));
+        const res = await BA.util.downloadUrls(urls, null);
+        if (res.unsupported) { BA.util.toast(t('settings.toastNeedHttps')); return; }
+        BA.util.toast(res.failed ? t('settings.toastSavedSkipped', { n: res.failed }) : t('settings.toastSavedOffline'));
       }
 
       function resumeBanner(r) {

@@ -40,6 +40,23 @@
       t.textContent = msg; t.hidden = false;
       clearTimeout(U._tt); U._tt = setTimeout(() => (t.hidden = true), ms);
     },
+    // fetch a list of URLs into a Cache with small concurrency; onProgress(done,total,failed).
+    // Returns {done,failed,total} or {unsupported:true} when the Cache API is missing (http://).
+    async downloadUrls(urls, onProgress, cacheName = 'ba9ara-audio-v1', concurrency = 4) {
+      if (!('caches' in window)) return { unsupported: true };
+      const cache = await caches.open(cacheName);
+      let done = 0, failed = 0; const total = urls.length, queue = urls.slice();
+      async function worker() {
+        while (queue.length) {
+          const u = queue.shift();
+          try { const r = await fetch(u, { mode: 'cors' }); if (r.ok) await cache.put(u, r.clone()); else failed++; }
+          catch (e) { failed++; }
+          done++; if (onProgress) onProgress(done, total, failed);
+        }
+      }
+      await Promise.all(Array.from({ length: concurrency }, () => worker()));
+      return { done, failed, total };
+    },
     // progress keys are "surah:ayah" strings (e.g. "2:255"); helpers so nothing
     // hand-builds them (existing "2:x" localStorage entries stay valid verbatim).
     ayahKey(s, n) { return s + ':' + n; },

@@ -126,22 +126,13 @@
     if (!r) return;
     btn.disabled = true;
     const urls = R.canLoop(r) ? R.allAyahUrls(r, BA.data.currentSurah, BA.data.count) : [R.surahUrl(r, BA.data.currentSurah)];
-    const cache = await caches.open(AUDIO_CACHE);
-    let done = 0, failed = 0; const total = urls.length;
     const fill = bar.firstElementChild;
-    const queue = urls.slice();
-    async function worker() {
-      while (queue.length) {
-        const u = queue.shift();
-        try { const resp = await fetch(u, { mode: 'cors' }); if (resp.ok) await cache.put(u, resp.clone()); else failed++; }
-        catch (e) { failed++; }
-        done++; fill.style.width = (done / total * 100).toFixed(1) + '%';
-        info.textContent = t('settings.downloaded', { done, total, failed: failed ? t('settings.failedSuffix', { n: failed }) : '' });
-      }
-    }
-    await Promise.all([worker(), worker(), worker(), worker()]); // small concurrency
+    const res = await BA.util.downloadUrls(urls, (done, total, failed) => {
+      fill.style.width = (done / total * 100).toFixed(1) + '%';
+      info.textContent = t('settings.downloaded', { done, total, failed: failed ? t('settings.failedSuffix', { n: failed }) : '' });
+    }, AUDIO_CACHE);
     btn.disabled = false;
-    BA.util.toast(failed ? t('settings.toastSavedSkipped', { n: failed }) : t('settings.toastSavedOffline'));
+    BA.util.toast(res.failed ? t('settings.toastSavedSkipped', { n: res.failed }) : t('settings.toastSavedOffline'));
   }
   async function clearAudio() {
     if ('caches' in window) { await caches.delete(AUDIO_CACHE); BA.util.toast(BA.i18n.t('settings.toastAudioCleared')); }

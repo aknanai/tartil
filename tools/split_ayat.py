@@ -74,8 +74,8 @@ def norm_word(w: str) -> str:
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Reference ayah text — works for ANY surah so the tool is testable on a tiny one.
-#   surah 2  → the app's own data/baqarah.json (exact text, both riwayāt)
-#   else     → api.alquran.cloud (Ḥafṣ / quran-uthmani), cached locally
+#   default  → the app's own data/quran/NNN.json (exact text, both riwayāt, all 114)
+#   fallback → api.alquran.cloud (Ḥafṣ / quran-uthmani), cached locally
 #   --ref-json overrides everything (offline, or Warsh editions the API lacks)
 # Returns: list[list[str]] — words[ayah_index][word_index]
 # ─────────────────────────────────────────────────────────────────────────────
@@ -83,8 +83,13 @@ def _words_from_text(text: str) -> list:
     return [w for w in re.split(r"\s+", text.strip()) if w]
 
 
-def ref_from_baqarah(riwayah: str) -> list:
-    data = json.loads((REPO / "data" / "baqarah.json").read_text(encoding="utf-8"))
+def ref_from_quran(surah: int, riwayah: str):
+    """The app's own per-surah file data/quran/NNN.json — exact text, both riwayāt,
+    for any surah. Returns None if the file isn't present (fall back to the API)."""
+    p = REPO / "data" / "quran" / f"{surah:03d}.json"
+    if not p.exists():
+        return None
+    data = json.loads(p.read_text(encoding="utf-8"))
     ayat = []
     for a in data["ayat"]:
         words = a["words"].get(riwayah) or _words_from_text(a["text"][riwayah])
@@ -146,9 +151,10 @@ def ref_from_api(surah: int) -> list:
 def get_reference_ayat(surah: int, riwayah: str, ref_json: str = None) -> list:
     if ref_json:
         return ref_from_ref_json(Path(ref_json), riwayah)
-    if surah == 2:
-        return ref_from_baqarah(riwayah)
-    return ref_from_api(surah)
+    local = ref_from_quran(surah, riwayah)          # data/quran/NNN.json — any surah, both riwayāt
+    if local is not None:
+        return local
+    return ref_from_api(surah)                        # Ḥafṣ only; use --ref-json for Warsh offline
 
 
 # ─────────────────────────────────────────────────────────────────────────────

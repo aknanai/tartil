@@ -413,6 +413,8 @@
     'drill.resumeBody':   { en: '{name} · ayāt {from}–{to}, at step {k}.' },
     'drill.resume':       { en: '▶ Resume' },
     'drill.discard':      { en: 'Start over' },
+    'drill.saveRange':    { en: '⬇ Save these ayāt offline' },
+    'drill.saving':       { en: 'Saving {n} ayāt…' },
   };
 
   let lang = 'en';
