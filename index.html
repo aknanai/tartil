@@ -38,6 +38,10 @@ if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]debug\b
     <span class="brand-name">Al-Baqarah <small>البقرة</small></span>
   </a>
   <div class="topbar-spacer"></div>
+  <label class="riwayah-pick surah-pick">
+    <span class="ri-label" data-i18n="topbar.surah">Surah</span>
+    <select id="surahSelect" aria-label="Surah" data-i18n-aria="topbar.surah"></select>
+  </label>
   <label class="riwayah-pick">
     <span class="ri-label" data-i18n="topbar.reading">Reading</span>
     <select id="riwayahSelect" aria-label="Reading (riwāyah)" data-i18n-aria="settings.reading"></select>

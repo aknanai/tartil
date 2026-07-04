@@ -2,17 +2,20 @@
 (function (BA) {
   const KEY = 'ba9ara.v1';
   const DEFAULT = {
-    version: 1,
+    version: 2,
     settings: {
-      riwayah: 'hafs', reciter: 'husary_muallim',
+      surah: 2, riwayah: 'hafs', reciter: 'husary_muallim',
       repsPerAyah: 3, rangeReps: 2, gapMs: 800, speed: 1,
       theme: 'light', hideLevel: 0, font: 'scheherazade', lang: 'off', uiLang: 'en',
       dailyNew: 5,                        // how many fresh ayāt a Review session introduces per day
+      patterns: [],                       // user-saved drill patterns
     },
     progress: {},                         // "2:3": {status, reviews, lastSeen, box, due, lastReview, firstSeen}
     streak: { current: 0, best: 0, lastActiveDay: null },
-    last: { view: 'home', ayah: 1, rangeFrom: 1, rangeTo: 5 },
+    last: { view: 'home', surah: 2, ayah: 1, rangeFrom: 1, rangeTo: 5, drill: null },
   };
+  const TOTAL_AYAT = 6236;
+  const surahCount = s => { const m = BA.data && BA.data.surahMeta && BA.data.surahMeta(s); return m ? m.ayah_count : 0; };
   const STATUS = ['unseen', 'learning', 'solid', 'mastered'];
 
   // ── Leitner spaced-repetition ladder ──────────────────────────────────────
@@ -38,6 +41,7 @@
     return e;
   }
   function migrate(s) {
+    s.version = DEFAULT.version;
     s.settings = Object.assign({}, DEFAULT.settings, s.settings);
     s.streak = Object.assign({}, DEFAULT.streak, s.streak);
     s.last = Object.assign({}, DEFAULT.last, s.last);
@@ -107,17 +111,20 @@
       this.touchStreak(); save();
       return e;
     },
-    // ayah numbers whose review is due now, soonest-first
+    // due reviews Qur'an-wide as {s, n}, soonest-first
     dueReviews() {
       const now = Date.now(), out = [];
-      for (let n = 1; n <= 286; n++) { const e = state.progress['2:' + n]; if (e && e.box >= 1 && (e.due || 0) <= now) out.push({ n, due: e.due }); }
+      for (const k in state.progress) {
+        const e = state.progress[k];
+        if (e && e.box >= 1 && (e.due || 0) <= now) { const p = BA.util.parseKey(k); out.push({ s: p.s, n: p.n, due: e.due }); }
+      }
       out.sort((a, b) => a.due - b.due);
-      return out.map(x => x.n);
+      return out.map(x => ({ s: x.s, n: x.n }));
     },
-    // never-seen ayāt, in order, up to `limit`
-    newAyat(limit) {
-      const out = [];
-      for (let n = 1; n <= 286 && out.length < limit; n++) if (!state.progress['2:' + n]) out.push(n);
+    // never-seen ayāt of `surah`, in order, up to `limit`
+    newAyat(surah, limit) {
+      const out = [], cnt = surahCount(surah);
+      for (let n = 1; n <= cnt && out.length < limit; n++) if (!state.progress[BA.util.ayahKey(surah, n)]) out.push(n);
       return out;
     },
     // how many fresh ayāt were introduced today (caps the daily intake)
@@ -128,25 +135,40 @@
     },
     newRemaining() { return Math.max(0, (state.settings.dailyNew || 0) - this.newToday()); },
     dueCount() { return this.dueReviews().length; },
-    // a session: everything due, then up to the day's remaining new ayāt
-    reviewQueue() {
-      const due = this.dueReviews().map(n => ({ n, isNew: false }));
-      const news = this.newAyat(this.newRemaining()).map(n => ({ n, isNew: true }));
+    // a session: everything due (any surah), then up to the day's new ayāt from `surah`
+    reviewQueue(surah) {
+      const s = surah == null ? (state.settings.surah || 2) : surah;
+      const due = this.dueReviews().map(it => ({ s: it.s, n: it.n, isNew: false }));
+      const news = this.newAyat(s, this.newRemaining()).map(n => ({ s, n, isNew: true }));
       return due.concat(news);
     },
     // soonest upcoming (not-yet-due) review time, or null
     nextDueTime() {
       const now = Date.now(); let best = null;
-      for (let n = 1; n <= 286; n++) { const e = state.progress['2:' + n]; if (e && e.box >= 1 && (e.due || 0) > now) best = best == null ? e.due : Math.min(best, e.due); }
+      for (const k in state.progress) { const e = state.progress[k]; if (e && e.box >= 1 && (e.due || 0) > now) best = best == null ? e.due : Math.min(best, e.due); }
       return best;
     },
 
-    counts() {
+    // per-surah status tally (defaults to the current surah)
+    counts(surah) {
+      const s = surah == null ? (state.settings.surah || 2) : surah, cnt = surahCount(s);
       const c = { unseen: 0, learning: 0, solid: 0, mastered: 0 };
-      for (let n = 1; n <= 286; n++) c[this.status('2:' + n)]++;
+      for (let n = 1; n <= cnt; n++) c[this.status(BA.util.ayahKey(s, n))]++;
       return c;
     },
-    percent() { const c = this.counts(); return Math.round(((c.solid + c.mastered) / 286) * 100); },
+    percent(surah) {
+      const s = surah == null ? (state.settings.surah || 2) : surah;
+      const c = this.counts(s), cnt = surahCount(s) || 1;
+      return Math.round(((c.solid + c.mastered) / cnt) * 100);
+    },
+    // whole-Qur'an tallies (from stored entries; unseen = 6236 − seen)
+    countsAll() {
+      const c = { unseen: 0, learning: 0, solid: 0, mastered: 0 }; let seen = 0;
+      for (const k in state.progress) { const st = state.progress[k].status || 'unseen'; if (st !== 'unseen') { c[st]++; seen++; } }
+      c.unseen = TOTAL_AYAT - seen;
+      return c;
+    },
+    percentAll() { const c = this.countsAll(); return Math.round(((c.solid + c.mastered) / TOTAL_AYAT) * 100); },
 
     touchStreak() {
       const today = BA.util.todayStr(), s = state.streak;

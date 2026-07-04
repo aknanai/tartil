@@ -7,6 +7,8 @@
       const t = i18n.t;
       store.setLast({ view: 'memorize' });
       const ri = store.settings.riwayah;
+      const surah = store.settings.surah;
+      const key = () => BA.util.ayahKey(surah, n);
       let n = clamp(store.last.ayah || 1, 1, data.count);
       let level = store.settings.hideLevel || 0;
       clear(sec);
@@ -97,7 +99,7 @@
         const tr = BA.app.translationEl(n); if (tr) trBox.append(tr);
         heading.textContent = t('common.ayahOf', { n, total: data.count });
         jump.value = n;
-        const st = store.status('2:' + n);
+        const st = store.status(key());
         statusPill.textContent = ({ unseen: t('memorize.statusNew'), learning: t('memorize.statusLearning'), solid: t('memorize.statusSolid'), mastered: t('memorize.statusMastered') })[st];
         statusPill.style.background = st === 'mastered' ? 'var(--emerald)' : st === 'solid' ? '#7bbf97' : st === 'learning' ? 'var(--gold-soft)' : 'var(--border)';
         statusPill.style.color = st === 'mastered' ? '#fff' : 'var(--text)';
@@ -106,17 +108,17 @@
       function loopAyah() {
         const rec = canFallback ? paRec : (curRec || data.defaultReciter(ri));
         audio.configure({ reciterId: rec.id, riwayah: ri });
-        audio.playSingle(n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
+        audio.playSingle(surah, n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
         card.classList.add('playing');
         if (canFallback) BA.util.toast(t('memorize.toastLoopFallback', { name: shortName(paRec), full: shortName(curRec) }));
       }
       function gotIt() {
-        const e = store.review('2:' + n, 'good'); BA.app.refreshStreak(); render();
+        const e = store.review(key(), 'good'); BA.app.refreshStreak(); render();
         const st = e ? e.status : 'learning';
         if (st === 'mastered') BA.util.toast(t('memorize.toastMastered', { n }));
         else BA.util.toast(t('memorize.toastSaved', { status: t('statusWord.' + st) }));
       }
-      function missed() { store.review('2:' + n, 'again'); BA.app.refreshStreak(); render(); }
+      function missed() { store.review(key(), 'again'); BA.app.refreshStreak(); render(); }
 
       BA.app.onAyah((a) => { card.classList.toggle('playing', a === n); });
       render();

@@ -1,6 +1,7 @@
 /* sw.js — offline app shell + serve any audio the user downloaded for offline. */
-const SHELL = 'ba9ara-shell-v7';
+const SHELL = 'ba9ara-shell-v8';
 const AUDIO = 'ba9ara-audio-v1';
+const DATA  = 'ba9ara-data-v1';                 // runtime cache for per-surah + translation JSON
 const SHELL_FILES = [
   './', './index.html', './manifest.webmanifest',
   './assets/icon.svg', './assets/icon-192.png', './assets/icon-512.png',
@@ -9,7 +10,8 @@ const SHELL_FILES = [
   './assets/fonts/scheherazade-400.woff2', './assets/fonts/scheherazade-700.woff2', './assets/fonts/amiri-quran.woff2',
   './js/util.js', './js/i18n.js', './js/store.js', './js/data.js', './js/reciters.js', './js/audio-engine.js', './js/reveal.js', './js/app.js',
   './js/views/home.js', './js/views/review.js', './js/views/listen.js', './js/views/memorize.js', './js/views/test.js', './js/views/progress.js', './js/views/settings.js',
-  './data/baqarah.json', './data/reciters.json', './data/credits.json', './data/translations.json',
+  './data/reciters.json', './data/credits.json',
+  './data/quran/index.json', './data/quran/002.json',   // default surah for first-run offline
 ];
 
 self.addEventListener('install', e => {
@@ -17,7 +19,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== SHELL && k !== AUDIO).map(k => caches.delete(k)))
+    Promise.all(keys.filter(k => k !== SHELL && k !== AUDIO && k !== DATA).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()));
 });
 
@@ -30,6 +32,13 @@ self.addEventListener('fetch', e => {
   const isAudio = url.hostname.endsWith('everyayah.com') || url.hostname.endsWith('mp3quran.net');
   if (isAudio) {
     e.respondWith(caches.open(AUDIO).then(c => c.match(req).then(hit => hit || fetch(req))));
+    return;
+  }
+
+  // per-surah + translation JSON: cache-first into the data cache (grows as surahs are visited)
+  if (url.origin === location.origin && /\/data\/(quran|translations)\//.test(url.pathname)) {
+    e.respondWith(caches.open(DATA).then(c => c.match(req).then(hit =>
+      hit || fetch(req).then(resp => { if (resp && resp.ok) c.put(req, resp.clone()); return resp; }).catch(() => hit))));
     return;
   }
 

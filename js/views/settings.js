@@ -83,8 +83,9 @@
           field(t('settings.theme'), themeBtns), field(t('settings.arabicFont'), fontSel)),
         el('div', { class: 'card' }, el('h3', {}, t('settings.offline')),
           el('div', { class: 'muted', style: 'font-size:.85rem' },
-            r && R.canLoop(r) ? t('settings.offlinePerAyah', { name: r.name_en })
+            r && R.canLoop(r) ? t('settings.offlinePerAyah', { name: r.name_en, count: data.count })
                               : t('settings.offlineFull', { name: r ? r.name_en : '' })),
+          el('div', { class: 'muted', style: 'font-size:.8rem;margin-top:.3rem' }, t('settings.offlineSurahNote', { name: BA.app.surahName(data.currentSurah) })),
           dlInfo, dlBar, el('div', { class: 'row' }, dlBtn, clrBtn))
       );
 
@@ -124,7 +125,7 @@
     if (!('caches' in window)) { BA.util.toast(t('settings.toastNeedHttps')); return; }
     if (!r) return;
     btn.disabled = true;
-    const urls = R.canLoop(r) ? R.allAyahUrls(r, BA.data.count) : [R.surahUrl(r)];
+    const urls = R.canLoop(r) ? R.allAyahUrls(r, BA.data.currentSurah, BA.data.count) : [R.surahUrl(r, BA.data.currentSurah)];
     const cache = await caches.open(AUDIO_CACHE);
     let done = 0, failed = 0; const total = urls.length;
     const fill = bar.firstElementChild;

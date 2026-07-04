@@ -1,5 +1,5 @@
 /* i18n.js — interface-language catalog + lookup.
-   SEPARATE from the Qur'an-meaning translations in data/translations.json:
+   SEPARATE from the Qur'an-meaning translations in data/translations/*.json:
    this only translates the app's chrome (buttons, menus, labels, toasts).
    The Arabic Qur'an text is never touched by anything here.
 
@@ -46,6 +46,7 @@
 
     // top bar / aria / player
     'topbar.reading':  { en: 'Reading', fr: 'Lecture', es: 'Lectura', ur: 'قراءت', ar: 'الرواية' },
+    'topbar.surah':    { en: 'Surah', fr: 'Sourate', es: 'Sura', ur: 'سورہ', ar: 'السورة' },
     'aria.menu':       { en: 'Menu', fr: 'Menu', es: 'Menú', ur: 'مینو', ar: 'القائمة' },
     'aria.theme':      { en: 'Toggle dark mode', fr: 'Basculer le mode sombre', es: 'Alternar modo oscuro', ur: 'ڈارک موڈ ٹوگل کریں', ar: 'تبديل الوضع الداكن' },
     'aria.streak':     { en: 'Daily streak', fr: 'Série quotidienne', es: 'Racha diaria', ur: 'روزانہ سلسلہ', ar: 'التتابع اليومي' },
@@ -80,8 +81,10 @@
     'level.blank':        { en: 'Blank', fr: 'Vide', es: 'Vacío', ur: 'خالی', ar: 'فارغ' },
 
     // home
-    'home.title':         { en: 'Memorize Surah Al-Baqarah', fr: 'Mémoriser la sourate Al-Baqara', es: 'Memoriza la sura Al-Baqara', ur: 'سورہ البقرہ حفظ کریں', ar: 'احفظ سورة البقرة' },
-    'home.ayatPill':      { en: '286 ayāt', fr: '286 versets', es: '286 aleyas', ur: '286 آیات', ar: '286 آية' },
+    'home.title':         { en: 'Memorize Surah {name}', fr: 'Mémoriser la sourate {name}', es: 'Memoriza la sura {name}', ur: 'سورہ {name} حفظ کریں', ar: 'احفظ سورة {name}' },
+    'home.ayatPill':      { en: '{n} ayāt', fr: '{n} versets', es: '{n} aleyas', ur: '{n} آیات', ar: '{n} آية' },
+    'home.ofQuran':       { en: '{pct}% of the whole Qur’an' },
+    'home.drill':         { en: '🏗️ Drill' },
     'home.continueLabel': { en: 'Continue where you left off', fr: 'Reprenez où vous vous êtes arrêté', es: 'Continúa donde lo dejaste', ur: 'جہاں چھوڑا تھا وہیں سے جاری رکھیں', ar: 'تابع من حيث توقفت' },
     'home.continue':      { en: '▶ Continue', fr: '▶ Continuer', es: '▶ Continuar', ur: '▶ جاری رکھیں', ar: '▶ متابعة' },
     'home.listen':        { en: '🔁 Listen', fr: '🔁 Écouter', es: '🔁 Escuchar', ur: '🔁 سنیں', ar: '🔁 استماع' },
@@ -188,7 +191,9 @@
     'progress.streakLabel': { en: 'Streak · best {n}', fr: 'Série · record {n}', es: 'Racha · récord {n}', ur: 'سلسلہ · بہترین {n}', ar: 'التتابع · الأفضل {n}' },
     'progress.mastered':    { en: 'Mastered', fr: 'Maîtrisé', es: 'Dominado', ur: 'مکمل', ar: 'متقَن' },
     'progress.solid':       { en: 'Solid', fr: 'Solide', es: 'Firme', ur: 'پختہ', ar: 'راسخة' },
-    'progress.allAyat':     { en: 'All 286 ayāt', fr: 'Les 286 versets', es: 'Las 286 aleyas', ur: 'تمام 286 آیات', ar: 'كل الآيات الـ286' },
+    'progress.allAyat':     { en: 'All {n} ayāt', fr: 'Les {n} versets', es: 'Las {n} aleyas', ur: 'تمام {n} آیات', ar: 'كل الآيات الـ{n}' },
+    'progress.acrossQuran': { en: 'Across the Qur’an' },
+    'progress.wholeQuran':  { en: '{pct}% of the Qur’an memorized' },
     'progress.tapCell':     { en: 'tap a cell to study it', fr: 'touchez une case pour l’étudier', es: 'toca una casilla para estudiarla', ur: 'مطالعہ کے لیے خانہ ٹیپ کریں', ar: 'انقر خلية لدراستها' },
     'progress.legendNew':      { en: 'new', fr: 'nouveau', es: 'nuevo', ur: 'نیا', ar: 'جديدة' },
     'progress.legendLearning': { en: 'learning', fr: 'en cours', es: 'aprendiendo', ur: 'سیکھ رہے', ar: 'قيد الحفظ' },
@@ -271,17 +276,18 @@
     'settings.arabicFont':     { en: 'Arabic font', fr: 'Police arabe', es: 'Fuente árabe', ur: 'عربی فونٹ', ar: 'الخط العربي' },
     'settings.offline':        { en: 'Offline', fr: 'Hors ligne', es: 'Sin conexión', ur: 'آف لائن', ar: 'دون اتصال' },
     'settings.offlinePerAyah': {
-      en: 'Save all 286 ayāt of “{name}” on this device (~35–45 MB) so loops work with no signal.',
-      fr: 'Enregistrez les 286 versets de « {name} » sur cet appareil (~35–45 Mo) pour que les boucles fonctionnent sans réseau.',
-      es: 'Guarda las 286 aleyas de «{name}» en este dispositivo (~35–45 MB) para que los bucles funcionen sin señal.',
-      ur: '”{name}“ کی تمام 286 آیات اس ڈیوائس پر محفوظ کریں (~35–45 MB) تاکہ لوپ بغیر سگنل کام کریں۔',
-      ar: 'احفظ كل الآيات الـ286 لـ«{name}» على هذا الجهاز (~35–45 ميجابايت) لتعمل التكرارات دون شبكة.' },
+      en: 'Save all {count} ayāt of “{name}” on this device so loops work with no signal.',
+      fr: 'Enregistrez les {count} versets de « {name} » sur cet appareil pour que les boucles fonctionnent sans réseau.',
+      es: 'Guarda las {count} aleyas de «{name}» en este dispositivo para que los bucles funcionen sin señal.',
+      ur: '”{name}“ کی تمام {count} آیات اس ڈیوائس پر محفوظ کریں تاکہ لوپ بغیر سگنل کام کریں۔',
+      ar: 'احفظ كل الآيات الـ{count} لـ«{name}» على هذا الجهاز لتعمل التكرارات دون شبكة.' },
     'settings.offlineFull': {
       en: 'Save the whole-surah recording of “{name}” (~30–40 MB) for offline listening.',
       fr: 'Enregistrez l’enregistrement de la sourate entière de « {name} » (~30–40 Mo) pour l’écoute hors ligne.',
       es: 'Guarda la grabación de la sura completa de «{name}» (~30–40 MB) para escuchar sin conexión.',
       ur: '”{name}“ کی مکمل سورہ ریکارڈنگ (~30–40 MB) آف لائن سننے کے لیے محفوظ کریں۔',
       ar: 'احفظ تسجيل السورة كاملة لـ«{name}» (~30–40 ميجابايت) للاستماع دون اتصال.' },
+    'settings.offlineSurahNote': { en: 'Saves the current surah ({name}). Switch surah in the top bar to save another.' },
     'settings.download':       { en: '⬇ Download for offline', fr: '⬇ Télécharger hors ligne', es: '⬇ Descargar sin conexión', ur: '⬇ آف لائن ڈاؤن لوڈ', ar: '⬇ تنزيل للاستخدام دون اتصال' },
     'settings.clearAudio':     { en: 'Clear cached audio', fr: 'Effacer l’audio en cache', es: 'Borrar audio en caché', ur: 'محفوظ آڈیو صاف کریں', ar: 'مسح الصوت المخزَّن' },
     'settings.toastNeedHttps': { en: 'Offline storage needs HTTPS (works once deployed).', fr: 'Le stockage hors ligne nécessite HTTPS (fonctionne une fois déployé).', es: 'El almacenamiento sin conexión necesita HTTPS (funciona al publicarse).', ur: 'آف لائن اسٹوریج کے لیے HTTPS درکار ہے (تعیناتی کے بعد کام کرتا ہے)۔', ar: 'يحتاج التخزين دون اتصال إلى HTTPS (يعمل بعد النشر).' },

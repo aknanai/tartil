@@ -7,6 +7,7 @@
       const t = i18n.t;
       store.setLast({ view: 'listen' });
       const ri = store.settings.riwayah;
+      const surah = store.settings.surah;
       const s = store.settings;
       clear(sec);
 
@@ -19,8 +20,8 @@
       });
       if (!data.recitersFor(ri).some(r => r.id === s.reciter)) recSel.selectedIndex = 0;
 
-      const fromI = numField(t('listen.from'), store.last.rangeFrom || 1);
-      const toI = numField(t('listen.to'), store.last.rangeTo || 5);
+      const fromI = numField(t('listen.from'), clamp(store.last.rangeFrom || 1, 1, data.count), 1, data.count);
+      const toI = numField(t('listen.to'), clamp(store.last.rangeTo || 5, 1, data.count), 1, data.count);
       const repsI = numField(t('listen.repeatEach'), s.repsPerAyah, 1, 20);
       const rangeI = numField(t('listen.loopRange'), s.rangeReps, 1, 50);
       const gap = el('input', { type: 'range', min: 0, max: 4000, step: 100, value: s.gapMs });
@@ -86,7 +87,7 @@
         store.setLast({ rangeFrom: from, rangeTo: to });
         BA.app.reconfigure();
         renderList();
-        audio.playRange({ from, to, repsPerAyah: +repsI.input.value, rangeReps: +rangeI.input.value, gapMs: +gap.value });
+        audio.playRange({ surah, from, to, repsPerAyah: +repsI.input.value, rangeReps: +rangeI.input.value, gapMs: +gap.value });
       }
 
       BA.app.onAyah((n) => {
@@ -103,7 +104,7 @@
   function field(label, control) {
     return el('div', { class: 'field' }, el('label', {}, label), control);
   }
-  function numField(label, val, min = 1, max = 286) {
+  function numField(label, val, min = 1, max = 286) {   // 286 = longest surah; callers pass data.count
     const s = BA.util.stepper(val, min, max);
     return { input: s.input, wrap: field(label, s.wrap) };
   }

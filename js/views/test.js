@@ -17,13 +17,14 @@
       const t = i18n.t;
       store.setLast({ view: 'test' });
       const ri = store.settings.riwayah;
+      const surah = store.settings.surah;
       let mode = 'blank', score = { right: 0, total: 0 };
       clear(sec);
 
       // per-ayah reciter for audio modes (whole-surah voices can't isolate an ayah)
       const curRec = data.reciter(store.settings.reciter);
       const loopRec = (curRec && curRec.capability === 'full-surah') ? data.defaultReciter(ri) : (curRec || data.defaultReciter(ri));
-      function playAyah(n) { audio.configure({ reciterId: loopRec.id, riwayah: ri }); audio.playSingle(n, { reps: 1 }); }
+      function playAyah(n) { audio.configure({ reciterId: loopRec.id, riwayah: ri }); audio.playSingle(surah, n, { reps: 1 }); }
 
       // pool of distractor words (≥3 letters) for fill-blank, tagged with their ayah
       const pool = [];
@@ -174,7 +175,7 @@
           grades);
       }
       function selfGrade(n, ok) {
-        store.review('2:' + n, ok ? 'good' : 'again');
+        store.review(BA.util.ayahKey(surah, n), ok ? 'good' : 'again');
         BA.app.refreshStreak();
         gotRight(ok);
         BA.util.toast(ok ? t('test.selfGradeOk') : t('test.selfGradeNo'));

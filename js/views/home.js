@@ -7,12 +7,13 @@
       const t = i18n.t;
       store.setLast({ view: 'home' });
       clear(sec);
+      const surah = store.settings.surah;
       const pct = store.percent(), c = store.counts(), last = store.last.ayah || 1;
       const due = store.dueCount(), newRem = store.newRemaining();
 
       sec.append(
-        el('h1', { class: 'page-title' }, t('home.title') + ' ',
-          el('span', { class: 'pill' }, t('home.ayatPill'))),
+        el('h1', { class: 'page-title' }, t('home.title', { name: BA.app.surahName(surah) }) + ' ',
+          el('span', { class: 'pill' }, t('home.ayatPill', { n: data.count }))),
 
         el('div', { class: 'card' },
           el('div', { class: 'row spread' },
@@ -37,6 +38,9 @@
           stat(`🔥 ${store.streak.current || 0}`, t('home.streakLabel', { n: store.streak.best || 0 })),
           stat(`${c.mastered}`, t('home.mastered')),
           stat(`${c.learning + c.solid}`, t('home.inProgress'))),
+
+        el('div', { class: 'muted', style: 'font-size:.82rem;margin:-.4rem 0 .6rem;text-align:center' },
+          t('home.ofQuran', { pct: store.percentAll() })),
 
         el('div', { class: 'card' },
           el('h3', {}, t('home.howTitle')),

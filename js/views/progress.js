@@ -1,4 +1,4 @@
-/* progress.js — heatmap of all 286 ayāt, stats, and backup (export/import). */
+/* progress.js — current-surah heatmap, whole-Qur'an summary, backup (export/import). */
 (function (BA) {
   const { el, clear } = BA.util;
   (BA.views = BA.views || {}).progress = {
@@ -7,11 +7,19 @@
       const t = i18n.t;
       store.setLast({ view: 'progress' });
       clear(sec);
+      const surah = store.settings.surah;
       const pct = store.percent(), c = store.counts();
+
+      // per-surah progress across the whole Qur'an (only surahs touched at all)
+      const perSurah = [];
+      data.surahList().forEach(m => {
+        const cc = store.counts(m.n);
+        if (cc.learning + cc.solid + cc.mastered > 0) perSurah.push({ m, pct: Math.round(((cc.solid + cc.mastered) / m.ayah_count) * 100) });
+      });
 
       const heat = el('div', { class: 'heat', role: 'list' });
       for (let n = 1; n <= data.count; n++) {
-        const st = store.status('2:' + n);
+        const st = store.status(BA.util.ayahKey(surah, n));
         heat.append(el('button', {
           type: 'button', role: 'listitem', dataset: { s: st },
           title: `${t('common.ayah', { n })} · ${t('statusWord.' + st)}`,
@@ -40,12 +48,23 @@
           : el('span'),
 
         el('div', { class: 'card' },
-          el('div', { class: 'row spread' }, el('h3', { style: 'margin:0' }, t('progress.allAyat')),
+          el('div', { class: 'row spread' }, el('h3', { style: 'margin:0' }, t('progress.allAyat', { n: data.count })),
             el('span', { class: 'muted', style: 'font-size:.8rem' }, t('progress.tapCell'))),
           heat,
           el('div', { class: 'legend' },
             leg('var(--border)', t('progress.legendNew')), leg('#e7c98a', t('progress.legendLearning')),
             leg('#7bbf97', t('progress.legendSolid')), leg('var(--emerald)', t('progress.legendMastered')))),
+
+        perSurah.length
+          ? el('div', { class: 'card' },
+              el('div', { class: 'row spread' }, el('h3', { style: 'margin:0' }, t('progress.acrossQuran')),
+                el('span', { class: 'muted', style: 'font-size:.8rem' }, t('progress.wholeQuran', { pct: store.percentAll() }))),
+              ...perSurah.map(x => el('div', { class: 'field', style: 'margin:.5rem 0 0' },
+                el('div', { class: 'row spread' },
+                  el('span', {}, `${x.m.n} · ${BA.app.surahName(x.m.n)}`),
+                  el('span', { class: 'muted', style: 'font-size:.85rem' }, x.pct + '%')),
+                el('div', { class: 'meter' }, el('i', { style: `width:${x.pct}%` })))))
+          : el('span'),
 
         el('div', { class: 'card' },
           el('h3', {}, t('progress.backupTitle')),
@@ -60,7 +79,7 @@
 
       function exportFile() {
         const blob = new Blob([store.exportJSON()], { type: 'application/json' });
-        const a = el('a', { href: URL.createObjectURL(blob), download: 'baqarah-hifz-backup.json' });
+        const a = el('a', { href: URL.createObjectURL(blob), download: 'quran-hifz-backup.json' });
         document.body.append(a); a.click(); a.remove();
         BA.util.toast(t('progress.toastDownloaded'));
       }

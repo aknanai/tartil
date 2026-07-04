@@ -40,6 +40,10 @@
       t.textContent = msg; t.hidden = false;
       clearTimeout(U._tt); U._tt = setTimeout(() => (t.hidden = true), ms);
     },
+    // progress keys are "surah:ayah" strings (e.g. "2:255"); helpers so nothing
+    // hand-builds them (existing "2:x" localStorage entries stay valid verbatim).
+    ayahKey(s, n) { return s + ':' + n; },
+    parseKey(k) { const i = k.indexOf(':'); return { s: +k.slice(0, i), n: +k.slice(i + 1) }; },
     // strip combining marks for first-letter hints / comparisons
     bareLetters(word) {
       let out = '';

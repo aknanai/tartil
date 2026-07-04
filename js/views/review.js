@@ -29,6 +29,7 @@
       const heading = el('div', { class: 'row spread' },
         el('strong', {}, t('review.title')), leftPill);
       const badge = el('span', { class: 'pill' }, '');
+      const surahChip = el('span', { class: 'pill' }, '');
       const arEl = el('div', { class: 'ar', dataset: { riwayah: ri } });
       const card = el('div', { class: 'ayah-card' }, arEl);
       const trBox = el('div', { class: 'tr-box' });
@@ -45,25 +46,30 @@
 
       sec.append(
         el('div', { class: 'card' }, heading, bar,
-          el('div', { class: 'row', style: 'margin-bottom:.4rem' }, badge),
+          el('div', { class: 'row', style: 'margin-bottom:.4rem' }, badge, surahChip),
           card, trBox, hint, preRow, grades));
 
       let revealed = false;
-      function renderItem() {
+      // queue items are {s, n, isNew}; a due item may live in another surah, so we
+      // load that surah on demand and read it via the explicit-surah accessors
+      // rather than flipping the global current surah per card.
+      async function renderItem() {
         const item = queue[pos];
-        const n = item.n;
+        const s = item.s, n = item.n;
+        if (!data.surahLoaded(s)) await data.loadSurah(s);
         revealed = item.isNew;                          // new ayāt start revealed (you're learning them)
         leftPill.textContent = `${pos + 1} / ${total}`;
         bar.firstElementChild.style.width = (pos / total * 100).toFixed(1) + '%';
         badge.textContent = item.isNew ? t('review.newBadge') : t('review.dueBadge');
         badge.style.background = item.isNew ? 'var(--gold-soft)' : 'var(--border)';
         badge.style.color = 'var(--text)';
+        surahChip.textContent = BA.app.surahName(s);
         clear(arEl);
-        if (revealed) arEl.append(document.createTextNode(data.text(n, ri) + ' '));
-        else reveal.render(arEl, data.words(n, ri), 3);  // first-letter hints; tap a word to peek
+        if (revealed) arEl.append(document.createTextNode(data.textIn(s, n, ri) + ' '));
+        else reveal.render(arEl, data.wordsIn(s, n, ri), 3);  // first-letter hints; tap a word to peek
         arEl.append(el('span', { class: 'ayah-num' }, n));
         clear(trBox);
-        if (revealed) { const tr = BA.app.translationEl(n); if (tr) trBox.append(tr); }
+        if (revealed) { const tr = BA.app.translationEl(n, s); if (tr) trBox.append(tr); }
         hint.textContent = item.isNew ? t('review.hintNew') : t('review.hintDue');
         showBtn.hidden = revealed;
         grades.hidden = !revealed;
@@ -71,27 +77,27 @@
       }
 
       function revealAll() {
-        const n = queue[pos].n;
+        const item = queue[pos], s = item.s, n = item.n;
         revealed = true;
         clear(arEl);
-        arEl.append(document.createTextNode(data.text(n, ri) + ' '), el('span', { class: 'ayah-num' }, n));
-        clear(trBox); const tr = BA.app.translationEl(n); if (tr) trBox.append(tr);
+        arEl.append(document.createTextNode(data.textIn(s, n, ri) + ' '), el('span', { class: 'ayah-num' }, n));
+        clear(trBox); const tr = BA.app.translationEl(n, s); if (tr) trBox.append(tr);
         showBtn.hidden = true; grades.hidden = false; hint.textContent = t('review.howWell');
       }
 
       function loop() {
-        const n = queue[pos].n;
+        const item = queue[pos];
         audio.configure({ reciterId: loopRec.id, riwayah: ri });
-        audio.playSingle(n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
+        audio.playSingle(item.s, item.n, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs });
         card.classList.add('playing');
       }
 
       function grade(g) {
-        const n = queue[pos].n;
-        store.review('2:' + n, g);
+        const item = queue[pos];
+        store.review(BA.util.ayahKey(item.s, item.n), g);
         tally[g] = (tally[g] || 0) + 1;
         BA.app.refreshStreak();
-        if (g === 'again') queue.push({ n, isNew: false });   // re-surface later this session
+        if (g === 'again') queue.push({ s: item.s, n: item.n, isNew: false });   // re-surface later this session
         pos++;
         if (pos >= queue.length) return renderDone();
         renderItem();
@@ -116,7 +122,7 @@
 
       function renderEmpty() {
         const next = store.nextDueTime();
-        const news = store.newAyat(1).length > 0;
+        const news = store.newAyat(store.settings.surah, 1).length > 0;
         sec.append(
           el('h1', { class: 'page-title' }, t('review.title')),
           el('div', { class: 'card', style: 'text-align:center' },

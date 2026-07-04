@@ -2,6 +2,9 @@
 (function (BA) {
   const { store, data, audio, nav, util, i18n } = BA;
   let curAyah = 1;
+  let curSurah = 2;
+  // surah name for chrome: Arabic script for RTL UI, transliteration otherwise
+  const surahName = n => { const m = data.surahMeta(n); return m ? (i18n.isRTL() ? m.name_ar : m.name_en) : ''; };
   let highlighter = null;   // the active view's "an ayah started playing" hook
   let deferredPrompt = null; // captured Android/Chrome install prompt
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
@@ -29,6 +32,28 @@
     });
   }
 
+  function fillSurahSelect() {
+    const sel = document.getElementById('surahSelect');
+    if (!sel) return;
+    util.clear(sel);
+    const rtl = i18n.isRTL();
+    data.surahList().forEach(m => {
+      const o = util.el('option', { value: m.n }, `${m.n} · ${rtl ? m.name_ar : m.name_en}`);
+      if (m.n === store.settings.surah) o.selected = true;
+      sel.append(o);
+    });
+  }
+
+  async function onSurahChange(n) {
+    n = +n;
+    audio.stop(); hide();
+    await data.setCurrent(n);
+    store.setSetting('surah', n);
+    store.setLast({ surah: n, ayah: 1 });
+    curSurah = n; curAyah = 1;
+    nav.route();                         // re-mount current view for the new surah
+  }
+
   function reconfigure() {
     const r = audio.configure({ reciterId: store.settings.reciter, riwayah: store.settings.riwayah });
     if (r && r.id !== store.settings.reciter) store.setSetting('reciter', r.id);
@@ -41,8 +66,8 @@
       .forEach(id => P[id] = document.getElementById(id));
     P.pPlay.addEventListener('click', () => audio.toggle());
     P.pStop.addEventListener('click', () => { audio.stop(); hide(); });
-    P.pPrev.addEventListener('click', () => { if (curAyah > 1) audio.playSingle(curAyah - 1, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs }); });
-    P.pNext.addEventListener('click', () => { if (curAyah < data.count) audio.playSingle(curAyah + 1, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs }); });
+    P.pPrev.addEventListener('click', () => { if (curAyah > 1) audio.playSingle(curSurah, curAyah - 1, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs }); });
+    P.pNext.addEventListener('click', () => { const m = data.surahMeta(curSurah); const cnt = m ? m.ayah_count : data.count; if (curAyah < cnt) audio.playSingle(curSurah, curAyah + 1, { reps: store.settings.repsPerAyah, gapMs: store.settings.gapMs }); });
 
     audio.on('statechange', s => {
       P.pPlay.textContent = (s === 'playing' || s === 'gap' || s === 'loading') ? '⏸' : '▶';
@@ -50,9 +75,10 @@
     });
     audio.on('loading', () => { show(); P.pSub.textContent = i18n.t('player.buffering'); });
     audio.on('ayahstart', (n, item) => {
-      curAyah = n; store.setLast({ ayah: n });
-      const r = audio.getReciter();
-      P.pTitle.textContent = item && item.isFull ? i18n.t('player.surah') : i18n.t('common.ayah', { n });
+      curAyah = n; if (item && item.surah != null) curSurah = item.surah;
+      store.setLast({ surah: curSurah, ayah: n });
+      const r = audio.getReciter(), sName = surahName(curSurah);
+      P.pTitle.textContent = item && item.isFull ? sName : `${sName} · ${i18n.t('common.ayah', { n })}`;
       P.pSub.textContent = (r ? r.name_en : '') + (item && item.isFull ? '' : ` · ${data.riwayahLabel(audio.getRiwayah())}`);
       show();
       if (highlighter) { try { highlighter(n, item); } catch (e) {} }
@@ -74,14 +100,17 @@
     i18n.setLang(l);
     store.setSetting('uiLang', l);
     i18n.apply();             // html dir/lang + static chrome
+    fillSurahSelect();        // surah names follow the UI script (Arabic vs transliteration)
     nav.buildSidebar();       // sidebar labels
     nav.route();              // re-mount current view in the new language
   }
   BA.app = {
-    setTheme, refreshStreak, onRiwayahChange, reconfigure, setUiLang,
+    setTheme, refreshStreak, onRiwayahChange, reconfigure, setUiLang, onSurahChange,
+    surahName: (n) => surahName(n),
     onAyah(fn) { highlighter = fn; },     // view registers a highlight hook (replaces previous)
     clearAyah() { highlighter = null; },
     get curAyah() { return curAyah; },
+    get curSurah() { return curSurah; },
     // reusable translation-language <select>; changing it reloads & refreshes the view
     makeLangSelect() {
       const sel = util.el('select', { 'aria-label': i18n.t('common.translation') });
@@ -97,11 +126,12 @@
       });
       return sel;
     },
-    // translation block for ayah n in the active language (or null when off/unavailable)
-    translationEl(n) {
+    // translation block for ayah n in the active language (or null when off/unavailable);
+    // pass surah for cross-surah items (e.g. the Review queue), else current surah
+    translationEl(n, surah) {
       const lang = store.settings.lang;
       if (!lang || lang === 'off') return null;
-      const txt = data.translation(n, lang);
+      const txt = data.translation(n, lang, surah);
       if (!txt) return null;
       const meta = data.langMeta(lang);
       return util.el('div', { class: 'translation', dir: meta ? meta.dir : 'ltr', lang }, txt);
@@ -131,6 +161,8 @@
       main.innerHTML = '<div class="card">' + i18n.t('app.dataLoadError') + '</div>';
       console.error(e); return;
     }
+    curSurah = store.settings.surah || 2;
+    fillSurahSelect();
     fillRiwayahSelect();
     reconfigure();
     audio.setRate(store.settings.speed || 1);
@@ -143,6 +175,8 @@
     document.getElementById('themeToggle').addEventListener('click',
       () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
     document.getElementById('riwayahSelect').addEventListener('change', e => onRiwayahChange(e.target.value));
+    const surahSel = document.getElementById('surahSelect');
+    if (surahSel) surahSel.addEventListener('change', e => onSurahChange(e.target.value));
     document.getElementById('menuToggle').addEventListener('click', () => nav.openMobile());
     document.getElementById('scrim').addEventListener('click', () => nav.closeMobile());
 
