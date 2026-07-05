@@ -40,9 +40,10 @@ python3 -m http.server 8000      # then open http://localhost:8000
 ```
 
 ## Deploy to GitHub Pages
-1. Push this folder to a repo (e.g. `aknanai/ba9ara`) on the `main` branch.
+1. Push this folder to a repo (e.g. `aknanai/tartil`) on the `main` branch.
 2. Repo → **Settings → Pages → Source = Deploy from a branch → `main` / `(root)`**.
-3. Live at `https://<user>.github.io/ba9ara/`. All paths are relative, so the project sub-path
+3. Live at `https://<user>.github.io/tartil/` (this app: **https://aknanai.github.io/tartil/**).
+   All paths are relative, so the project sub-path
    works as-is. `.nojekyll` is included so `assets/` and `js/` are served verbatim.
 4. (Optional) add a `CNAME` file for a custom domain.
 
