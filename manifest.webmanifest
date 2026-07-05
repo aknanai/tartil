@@ -1,7 +1,7 @@
 {
-  "name": "Al-Baqarah · Hifz",
-  "short_name": "Al-Baqarah",
-  "description": "Memorize Surah Al-Baqarah — Ḥafṣ & Warsh, with audio loop, progressive hiding, tests and progress.",
+  "name": "Tartīl — Qurʾan Ḥifẓ",
+  "short_name": "Tartīl",
+  "description": "Memorize the whole Qurʾan — all 114 surahs, Ḥafṣ & Warsh — with audio loop, cumulative drills, progressive hiding, tests, and spaced-repetition review.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

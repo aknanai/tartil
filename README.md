@@ -1,9 +1,10 @@
-# Al-Baqarah · Hifz  🕌
+# Tartīl · تَرْتِيل  🕌
 
-A calm, **offline-friendly** web app for memorizing the **whole Qurʾan** — all **114 surahs
+**Tartīl** (تَرْتِيل — “measured, beautiful recitation”, Qurʾan 73:4) is a calm,
+**offline-friendly** web app for memorizing the **whole Qurʾan** — all **114 surahs
 (6236 ayāt)** — in both **Ḥafṣ ʿan ʿĀṣim** and **Warsh ʿan Nāfiʿ** readings, text *and* audio.
-(It began as an Al-Baqarah tool — hence the name — and now covers every surah; pick one from
-the **Surah** menu in the top bar.)
+(It began as an Al-Baqarah tool and now covers every surah; pick one from the **Surah** menu
+in the top bar.)
 
 > Built to be hosted free on **GitHub Pages**. No backend, no build step — just static files.
 > Surah text loads lazily one surah at a time, so it stays fast and works offline.

@@ -22,7 +22,7 @@
   // ── string catalog ────────────────────────────────────────────────────────
   const S = {
     // app / boot
-    'app.title':        { en: 'Al-Baqarah · Hifz', fr: 'Al-Baqara · Hifz', es: 'Al-Baqara · Hifz', ur: 'البقرہ · حفظ', ar: 'البقرة · حفظ' },
+    'app.title':        { en: 'Tartīl — Qurʾan Ḥifẓ', fr: 'Tartīl — Ḥifẓ du Coran', es: 'Tartīl — Memorización del Corán', ur: 'ترتیل — قرآن حفظ', ar: 'ترتيل — حفظ القرآن' },
     'app.appInstalled': { en: 'App installed ✓', fr: 'Application installée ✓', es: 'App instalada ✓', ur: 'ایپ انسٹال ہوگئی ✓', ar: 'تم تثبيت التطبيق ✓' },
     'app.couldNotLoadTranslation': { en: 'Could not load translation', fr: 'Impossible de charger la traduction', es: 'No se pudo cargar la traducción', ur: 'ترجمہ لوڈ نہ ہوسکا', ar: 'تعذّر تحميل الترجمة' },
     'app.dataLoadError': {
@@ -55,7 +55,6 @@
     'aria.next':       { en: 'Next ayah', fr: 'Verset suivant', es: 'Aleya siguiente', ur: 'اگلی آیت', ar: 'الآية التالية' },
     'aria.stop':       { en: 'Stop', fr: 'Arrêter', es: 'Detener', ur: 'روکیں', ar: 'إيقاف' },
     'player.buffering':{ en: 'buffering…', fr: 'mise en mémoire…', es: 'cargando…', ur: 'بفرنگ…', ar: 'جارٍ التحميل…' },
-    'player.surah':    { en: 'Surah Al-Baqarah', fr: 'Sourate Al-Baqara', es: 'Sura Al-Baqara', ur: 'سورہ البقرہ', ar: 'سورة البقرة' },
 
     // common
     'common.ayah':        { en: 'Ayah {n}', fr: 'Verset {n}', es: 'Aleya {n}', ur: 'آیت {n}', ar: 'الآية {n}' },
@@ -231,11 +230,11 @@
       ar: 'أنت تستخدم التطبيق المثبَّت. نزّل قارئًا أدناه لاستخدامه دون اتصال بالكامل.' },
     'settings.installTitle':   { en: '📲 Install app', fr: '📲 Installer l’application', es: '📲 Instalar app', ur: '📲 ایپ انسٹال کریں', ar: '📲 تثبيت التطبيق' },
     'settings.installCanDesc': {
-      en: 'Add Al-Baqarah to your home screen for full-screen, app-like use that works offline.',
-      fr: 'Ajoutez Al-Baqara à votre écran d’accueil pour une utilisation plein écran, façon appli, qui fonctionne hors ligne.',
-      es: 'Añade Al-Baqara a tu pantalla de inicio para un uso a pantalla completa, tipo app, que funciona sin conexión.',
-      ur: 'پوری اسکرین، ایپ جیسی اور آف لائن استعمال کے لیے البقرہ کو ہوم اسکرین پر شامل کریں۔',
-      ar: 'أضِف البقرة إلى الشاشة الرئيسية لاستخدام بملء الشاشة يشبه التطبيق ويعمل دون اتصال.' },
+      en: 'Add Tartīl to your home screen for full-screen, app-like use that works offline.',
+      fr: 'Ajoutez Tartīl à votre écran d’accueil pour une utilisation plein écran, façon appli, qui fonctionne hors ligne.',
+      es: 'Añade Tartīl a tu pantalla de inicio para un uso a pantalla completa, tipo app, que funciona sin conexión.',
+      ur: 'پوری اسکرین، ایپ جیسی اور آف لائن استعمال کے لیے ترتیل کو ہوم اسکرین پر شامل کریں۔',
+      ar: 'أضِف ترتيل إلى الشاشة الرئيسية لاستخدام بملء الشاشة يشبه التطبيق ويعمل دون اتصال.' },
     'settings.installBtn':     { en: '⬇ Install app', fr: '⬇ Installer l’application', es: '⬇ Instalar app', ur: '⬇ ایپ انسٹال کریں', ar: '⬇ تثبيت التطبيق' },
     'settings.installIOS': {
       en: 'On iPhone/iPad: open in <b>Safari</b>, tap the <b>Share</b> button (⬆️ box-with-arrow), then choose <b>“Add to Home Screen”</b>.',
