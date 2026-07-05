@@ -1,5 +1,5 @@
 /* sw.js — offline app shell + serve any audio the user downloaded for offline. */
-const SHELL = 'ba9ara-shell-v10';   // rename → Tartīl (re-cache index.html + manifest)
+const SHELL = 'ba9ara-shell-v11';   // iPhone safe-area + top-bar fit (re-cache style.css)
 const AUDIO = 'ba9ara-audio-v1';
 const DATA  = 'ba9ara-data-v1';                 // runtime cache for per-surah + translation JSON
 const SHELL_FILES = [
